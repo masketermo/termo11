@@ -689,6 +689,8 @@ function SettingsManager() {
     announcement: "SINIRLI SÜRE! TÜM ÜRÜNLERDE KARGO BEDAVA",
     announcementActive: true,
     heroImage: "",
+    beforeImage: "",
+    afterImage: "",
     logo: "",
     brandColor: "#059669",
     bgColor: "#ffffff",
@@ -706,7 +708,7 @@ function SettingsManager() {
     });
   }, []);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'heroImage' | 'logo') => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'heroImage' | 'logo' | 'beforeImage' | 'afterImage') => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -824,6 +826,47 @@ function SettingsManager() {
            </div>
 
            <div className="pt-16 border-t border-slate-50 grid md:grid-cols-2 gap-12">
+              <div className="space-y-4">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 block mb-3 ml-2 italic">ÖNCE (Kötü Durum)</label>
+                <div className="relative group aspect-[3/4] rounded-[2.5rem] overflow-hidden bg-slate-50 border-2 border-dashed border-slate-100 flex items-center justify-center shadow-inner transition-all hover:border-rose-400">
+                  {settings.beforeImage ? (
+                    <img src={settings.beforeImage || undefined} className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="text-center p-4">
+                      <div className="w-12 h-12 rounded-full bg-rose-50 flex items-center justify-center mx-auto mb-2 text-rose-300">
+                        <Sparkles className="h-6 w-6" />
+                      </div>
+                      <span className="text-[10px] font-black uppercase text-slate-400">Görsel Seç</span>
+                    </div>
+                  )}
+                  <label className="absolute inset-0 bg-slate-950/70 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center cursor-pointer">
+                    <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageChange(e, 'beforeImage')} />
+                    <span className="text-white text-[10px] font-black uppercase tracking-widest bg-rose-600 px-6 py-3 rounded-2xl">Logoyu Güncelle</span>
+                  </label>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 block mb-3 ml-2 italic">SONRA (İyi Durum)</label>
+                <div className="relative group aspect-[3/4] rounded-[2.5rem] overflow-hidden bg-slate-50 border-2 border-dashed border-slate-100 flex items-center justify-center shadow-inner transition-all hover:border-emerald-400">
+                  {settings.afterImage ? (
+                    <img src={settings.afterImage || undefined} className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="text-center p-4">
+                      <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-2 text-emerald-300">
+                        <Sparkles className="h-6 w-6" />
+                      </div>
+                      <span className="text-[10px] font-black uppercase text-slate-400">Görsel Seç</span>
+                    </div>
+                  )}
+                  <label className="absolute inset-0 bg-slate-950/70 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center cursor-pointer">
+                    <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageChange(e, 'afterImage')} />
+                    <span className="text-white text-[10px] font-black uppercase tracking-widest bg-emerald-600 px-6 py-3 rounded-2xl">Logoyu Güncelle</span>
+                  </label>
+                </div>
+              </div>
+           </div>
+
+           <div className="pt-16 border-t border-slate-50 grid md:grid-cols-2 gap-12">
               <div className="space-y-8">
                 <p className="text-[10px] font-black text-indigo-600 tracking-widest uppercase italic border-l-2 border-indigo-600 pl-4 leading-none">İletişim & Network</p>
                 <div className="space-y-4">
@@ -838,6 +881,14 @@ function SettingsManager() {
                     <input className="w-full rounded-2xl border border-slate-100 bg-slate-50 p-5 font-bold text-sm focus:bg-white focus:ring-2 focus:ring-slate-100 transition-all" placeholder="Sipariş Havuzu Başlığı" value={settings.orderTitle} onChange={e => setSettings({ ...settings, orderTitle: e.target.value })} />
                  </div>
               </div>
+           </div>
+           <div className="flex justify-end pt-12 border-t border-slate-50">
+             <button
+                type="submit"
+                className="px-12 py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] hover:bg-emerald-600 transition-all shadow-2xl active:scale-95"
+             >
+                Ayarları Kaydet ve Yayına Al
+             </button>
            </div>
         </div>
       </form>

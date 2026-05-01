@@ -35,6 +35,8 @@ export interface SiteSettings {
   announcement: string;
   announcementActive: boolean;
   heroImage: string;
+  beforeImage: string;
+  afterImage: string;
   logo: string;
   brandColor: string;
   bgColor: string;

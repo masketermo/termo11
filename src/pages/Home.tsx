@@ -159,8 +159,8 @@ export default function Home() {
   // ─── Render ────────────────────────────────────────────────────────────────
   return (
     <div
-      className="min-h-screen font-sans text-slate-900 antialiased selection:bg-emerald-900 selection:text-white"
-      style={{ "--brand": brandColor, backgroundColor: bgColor } as React.CSSProperties}
+      className="min-h-screen font-sans text-slate-900 antialiased selection:bg-emerald-900 selection:text-white transition-colors duration-500"
+      style={{ "--brand": brandColor, "--bg": bgColor, backgroundColor: "var(--bg)" } as React.CSSProperties}
     >
       {/* ── Announcement bar ─────────────────────────────────────────────── */}
       <AnimatePresence>
@@ -169,7 +169,8 @@ export default function Home() {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden bg-emerald-900"
+            className="overflow-hidden"
+            style={{ backgroundColor: brandColor }}
           >
             <div className="relative overflow-hidden py-2.5">
               <motion.div
@@ -193,7 +194,7 @@ export default function Home() {
       </AnimatePresence>
 
       {/* ── Header ───────────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/90 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 border-b border-black/5 backdrop-blur-xl" style={{ backgroundColor: `rgba(${parseInt(bgColor.slice(1,3), 16)}, ${parseInt(bgColor.slice(3,5), 16)}, ${parseInt(bgColor.slice(5,7), 16)}, 0.8)` }}>
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
             {settings?.logo ? (
@@ -238,7 +239,7 @@ export default function Home() {
       </header>
 
       {/* ── Hero Section - Prompt 1 ──────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-white pt-16 pb-24 md:pt-28 md:pb-36">
+      <section className="relative overflow-hidden pt-16 pb-24 md:pt-28 md:pb-36" style={{ background: `linear-gradient(to bottom right, ${brandColor}0D, var(--bg), var(--bg))` }}>
         <div className="absolute top-0 right-0 -translate-y-1/3 translate-x-1/3 w-96 h-96 bg-emerald-200 rounded-full opacity-20 blur-3xl" />
         
         <div className="relative mx-auto max-w-7xl px-6">
@@ -366,7 +367,7 @@ export default function Home() {
       </section>
 
       {/* ── Before-After Section - Prompt 2 ───────────────────────────────── */}
-      <section className="py-24 bg-white">
+      <section className="py-24 border-y border-black/5" style={{ backgroundColor: "var(--bg)" }}>
         <div className="mx-auto max-w-7xl px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-black tracking-tight text-emerald-700 md:text-4xl">
@@ -379,27 +380,35 @@ export default function Home() {
             <div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="rounded-2xl overflow-hidden bg-slate-100">
-                  <div className="aspect-[3/4] bg-gradient-to-br from-rose-100 to-slate-200 flex items-center justify-center p-8">
-                    <div className="text-center">
-                      <div className="w-24 h-24 mx-auto rounded-full bg-rose-200/50 mb-4" />
-                      <p className="text-xs font-semibold text-rose-600">Sivilce & Pürüzlü Cilt</p>
-                    </div>
+                  <div className="aspect-[3/4] bg-gradient-to-br from-rose-100 to-slate-200 flex items-center justify-center relative">
+                    {settings?.beforeImage ? (
+                      <img src={settings.beforeImage} alt="Önce" className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="text-center p-8">
+                        <div className="w-24 h-24 mx-auto rounded-full bg-rose-200/50 mb-4" />
+                        <p className="text-xs font-semibold text-rose-600">Sivilce & Pürüzlü Cilt</p>
+                      </div>
+                    )}
                   </div>
-                  <div className="p-3 text-center bg-rose-50">
-                    <span className="text-xs font-bold text-rose-600">ÖNCE</span>
+                  <div className="p-3 text-center bg-rose-50 border-t border-rose-100">
+                    <span className="text-xs font-bold text-rose-600 uppercase tracking-widest">ÖNCE</span>
                   </div>
                 </div>
                 <div className="rounded-2xl overflow-hidden bg-slate-100">
-                  <div className="aspect-[3/4] bg-gradient-to-br from-emerald-100 to-slate-100 flex items-center justify-center p-8">
-                    <div className="text-center">
-                      <div className="w-24 h-24 mx-auto rounded-full bg-emerald-200/50 mb-4 flex items-center justify-center">
-                        <Sparkles className="h-8 w-8 text-emerald-600" />
+                  <div className="aspect-[3/4] bg-gradient-to-br from-emerald-100 to-slate-100 flex items-center justify-center relative">
+                    {settings?.afterImage ? (
+                      <img src={settings.afterImage} alt="Sonra" className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="text-center p-8">
+                        <div className="w-24 h-24 mx-auto rounded-full bg-emerald-200/50 mb-4 flex items-center justify-center">
+                          <Sparkles className="h-8 w-8 text-emerald-600" />
+                        </div>
+                        <p className="text-xs font-semibold text-emerald-600">Pürüzsüz & Temiz Cilt</p>
                       </div>
-                      <p className="text-xs font-semibold text-emerald-600">Pürüzsüz & Temiz Cilt</p>
-                    </div>
+                    )}
                   </div>
-                  <div className="p-3 text-center bg-emerald-50">
-                    <span className="text-xs font-bold text-emerald-600">SONRA</span>
+                  <div className="p-3 text-center bg-emerald-50 border-t border-emerald-100">
+                    <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">SONRA</span>
                   </div>
                 </div>
               </div>
@@ -443,7 +452,7 @@ export default function Home() {
       </section>
 
       {/* ── Psychological Impact & Social Proof - Prompt 3 ────────────────── */}
-      <section className="py-24 bg-emerald-50">
+      <section className="py-24" style={{ backgroundColor: brandColor + "0D" }}>
         <div className="mx-auto max-w-7xl px-6">
           {/* Psychological text */}
           <div className="text-center mb-12">
@@ -511,7 +520,7 @@ export default function Home() {
           {/* Price packages */}
           <div>
             <h3 className="text-2xl font-black text-center text-slate-900 mb-8">{settings?.productsTitle || "Paketleri İncele"}</h3>
-            <div className="grid gap-6 md:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {products.map((product, idx) => {
                 const isSelected = selectedProduct?.id === product.id;
                 return (
@@ -529,7 +538,13 @@ export default function Home() {
                         En Çok Tercih Edilen
                       </div>
                     )}
-                    <Package className={cn("h-10 w-10 mx-auto mb-3", isSelected ? "text-emerald-700" : "text-emerald-600")} />
+                    <div className="mx-auto mb-4 h-24 w-24 overflow-hidden rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center">
+                      {product.image ? (
+                        <img src={product.image} alt={product.name} className="h-full w-full object-cover transition-transform group-hover:scale-110" />
+                      ) : (
+                        <Package className={cn("h-10 w-10", isSelected ? "text-emerald-700" : "text-emerald-600")} />
+                      )}
+                    </div>
                     <h4 className="text-xl font-bold text-slate-900">{product.name}</h4>
                     <div className="my-4">
                       <span className={cn("text-3xl font-black", isSelected ? "text-emerald-700" : "text-slate-900")}>
@@ -566,7 +581,8 @@ export default function Home() {
       <section
         id="order"
         ref={orderSectionRef}
-        className="border-t border-slate-100 bg-white py-24 md:py-36"
+        className="py-24 md:py-36 border-t border-black/5"
+        style={{ backgroundColor: "var(--bg)" }}
       >
         <div className="mx-auto max-w-7xl px-6">
           <div className="grid gap-16 lg:grid-cols-2 lg:items-start lg:gap-24">
@@ -630,7 +646,11 @@ export default function Home() {
                     {selectedProduct ? (
                       <div className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-slate-50 p-4">
                         <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-emerald-100 flex items-center justify-center">
-                          <Package className="h-8 w-8 text-emerald-700" />
+                          {selectedProduct.image ? (
+                            <img src={selectedProduct.image} alt={selectedProduct.name} className="h-full w-full object-cover" />
+                          ) : (
+                            <Package className="h-8 w-8 text-emerald-700" />
+                          )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-[10px] font-semibold uppercase tracking-wider text-emerald-600">
