@@ -453,7 +453,15 @@ function SettingsManager() {
     footerText: "",
     announcement: "SINIRLI SÜRE! TÜM ÜRÜNLERDE KARGO BEDAVA",
     announcementActive: true,
-    heroImage: ""
+    heroImage: "",
+    logo: "",
+    brandColor: "#4f46e5",
+    featuresTitle: "Detaylarda Gizli Mükemmellik",
+    featuresSubtitle: "Mühendislik",
+    productsTitle: "İhtiyacınıza Uygun Seti Seçin",
+    productsSubtitle: "Paket Seçimi",
+    orderTitle: "Kapıda Ödeme Avantajıyla Güvenli Sipariş",
+    orderSubtitle: "Son İşlem"
   });
 
   useEffect(() => {
@@ -462,12 +470,12 @@ function SettingsManager() {
     });
   }, []);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'heroImage' | 'logo') => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setSettings({ ...settings, heroImage: reader.result as string });
+        setSettings({ ...settings, [field]: reader.result as string });
       };
       reader.readAsDataURL(file);
     }
@@ -476,17 +484,61 @@ function SettingsManager() {
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     set(ref(db, "settings"), settings);
-    alert("Ayarlar kaydedildi.");
+    alert("Ayarlar başarıyla güncellendi.");
   };
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h2 className="text-3xl font-black italic uppercase italic">Site Ayarları</h2>
-        <p className="text-stone-400">Tek sayfa içeriğini ve kampanya duyurularını buradan yönetin.</p>
+    <div className="space-y-8 pb-20">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-black italic uppercase">Site Mimarisi</h2>
+          <p className="text-stone-400">Marka kimliğini ve sayfa metinlerini tek noktadan yönetin.</p>
+        </div>
+        <div className="flex gap-4">
+          <div className="h-12 w-12 rounded-2xl bg-white shadow-sm flex items-center justify-center p-2 border border-slate-100">
+             <div className="h-full w-full rounded-lg" style={{ backgroundColor: settings.brandColor || '#4f46e5' }} />
+          </div>
+        </div>
       </div>
 
-      <form onSubmit={handleSave} className="max-w-3xl space-y-8">
+      <form onSubmit={handleSave} className="max-w-4xl space-y-8">
+        {/* Branding & Logo */}
+        <div className="rounded-[2.5rem] border border-stone-200 bg-white p-8 shadow-sm">
+          <h3 className="mb-6 text-sm font-black uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-4 italic">Branding (Marka)</h3>
+          <div className="grid gap-8 md:grid-cols-2">
+            <div>
+              <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 ml-1 block mb-2">Kurumsal Logo (PNG/SVG Tavsiye Edilir)</label>
+              <div className="relative group h-24 rounded-2xl overflow-hidden bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center">
+                {settings.logo ? (
+                  <img src={settings.logo} className="h-12 object-contain" />
+                ) : (
+                  <span className="text-slate-300 font-bold">Logo Yok</span>
+                )}
+                <label className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
+                  <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageChange(e, 'logo')} />
+                  <span className="text-white text-[10px] font-black uppercase tracking-widest">Logo Güncelle</span>
+                </label>
+              </div>
+            </div>
+            <div>
+              <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 ml-1 block mb-2">Marka Rengi</label>
+              <div className="flex gap-4">
+                <input
+                  type="color"
+                  className="h-24 w-24 cursor-pointer rounded-2xl border-2 border-slate-100 bg-slate-50 p-1"
+                  value={settings.brandColor || '#4f46e5'}
+                  onChange={e => setSettings({ ...settings, brandColor: e.target.value })}
+                />
+                <input
+                  className="flex-1 rounded-2xl border-2 border-stone-50 bg-stone-50 p-4 font-bold text-sm focus:border-stone-900 focus:bg-white focus:outline-none transition-all h-24"
+                  value={settings.brandColor || '#4f46e5'}
+                  onChange={e => setSettings({ ...settings, brandColor: e.target.value })}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Announcement Bar Settings */}
         <div className="rounded-[2.5rem] border border-stone-200 bg-white p-8 shadow-sm">
           <div className="mb-6 flex items-center justify-between border-b border-slate-100 pb-4">
@@ -516,94 +568,112 @@ function SettingsManager() {
           </div>
         </div>
 
-        {/* Hero Section Settings */}
-        <div className="rounded-[2.5rem] border border-stone-200 bg-white p-8 shadow-sm">
-          <h3 className="mb-6 text-sm font-black uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-4 italic">Ana Kapak (Hero)</h3>
-          
-          <div className="grid gap-8 md:grid-cols-2">
-            <div className="space-y-6">
-              <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 ml-1 block mb-2">Başlık</label>
-                <input
-                  className="w-full rounded-2xl border-2 border-stone-50 bg-stone-50 p-4 font-bold text-sm focus:border-stone-900 focus:bg-white focus:outline-none transition-all"
-                  value={settings.bannerTitle}
-                  onChange={e => setSettings({ ...settings, bannerTitle: e.target.value })}
-                />
+        {/* Page Content Editor */}
+        <div className="rounded-[3rem] border border-slate-200 bg-white p-10 shadow-sm space-y-12">
+           <h3 className="text-lg font-black uppercase italic tracking-widest text-slate-900 border-b-2 border-indigo-600 inline-block pb-1">Sayfa İçerik Editörü</h3>
+           
+           {/* Hero */}
+           <div className="grid gap-8 md:grid-cols-2">
+              <div className="space-y-6">
+                <p className="text-xs font-black text-indigo-600 italic">01. ANA GİRİŞ (HERO)</p>
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 block mb-2">Büyük Başlık</label>
+                  <input className="w-full rounded-2xl border-2 border-stone-50 bg-stone-50 p-4 font-bold text-sm focus:border-indigo-600 focus:bg-white transition-all" value={settings.bannerTitle} onChange={e => setSettings({ ...settings, bannerTitle: e.target.value })} />
+                </div>
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 block mb-2">Açıklama</label>
+                  <textarea rows={3} className="w-full rounded-2xl border-2 border-stone-50 bg-stone-50 p-4 font-bold text-sm focus:border-indigo-600 focus:bg-white transition-all" value={settings.bannerSubtitle} onChange={e => setSettings({ ...settings, bannerSubtitle: e.target.value })} />
+                </div>
               </div>
               <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 ml-1 block mb-2">Alt Yazı</label>
-                <textarea
-                  className="w-full rounded-2xl border-2 border-stone-50 bg-stone-50 p-4 font-bold text-sm focus:border-stone-900 focus:bg-white focus:outline-none transition-all"
-                  rows={3}
-                  value={settings.bannerSubtitle}
-                  onChange={e => setSettings({ ...settings, bannerSubtitle: e.target.value })}
-                />
+                <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 block mb-2">Hero Görseli</label>
+                <div className="relative group aspect-square rounded-3xl overflow-hidden bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center">
+                  {settings.heroImage ? (
+                    <img src={settings.heroImage} className="h-full w-full object-cover" />
+                  ) : (
+                    <Eye className="h-10 w-10 text-slate-200" />
+                  )}
+                  <label className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
+                    <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageChange(e, 'heroImage')} />
+                    <span className="text-white text-[10px] font-black uppercase tracking-widest">Görsel Seç</span>
+                  </label>
+                </div>
               </div>
-            </div>
-            
-            <div>
-              <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 ml-1 block mb-2">Giriş Görseli</label>
-              <div className="relative group aspect-square rounded-3xl overflow-hidden bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center">
-                {settings.heroImage ? (
-                  <img src={settings.heroImage} className="h-full w-full object-cover" />
-                ) : (
-                  <Eye className="h-10 w-10 text-slate-200" />
-                )}
-                <label className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
-                  <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
-                  <span className="text-white text-[10px] font-black uppercase tracking-widest">Görsel Seç</span>
-                </label>
+           </div>
+
+           {/* Features */}
+           <div className="pt-8 border-t border-slate-100 space-y-6">
+              <p className="text-xs font-black text-indigo-600 italic">02. ÖZELLİKLER BÖLÜMÜ</p>
+              <div className="grid gap-6 md:grid-cols-2">
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 block mb-2">Bölüm Üst Yazı</label>
+                  <input className="w-full rounded-2xl border-2 border-stone-50 bg-stone-50 p-4 font-bold text-sm focus:border-indigo-600 focus:bg-white transition-all" value={settings.featuresSubtitle} onChange={e => setSettings({ ...settings, featuresSubtitle: e.target.value })} />
+                </div>
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 block mb-2">Ana Başlık</label>
+                  <input className="w-full rounded-2xl border-2 border-stone-50 bg-stone-50 p-4 font-bold text-sm focus:border-indigo-600 focus:bg-white transition-all" value={settings.featuresTitle} onChange={e => setSettings({ ...settings, featuresTitle: e.target.value })} />
+                </div>
               </div>
-            </div>
-          </div>
+           </div>
+
+           {/* Products */}
+           <div className="pt-8 border-t border-slate-100 space-y-6">
+              <p className="text-xs font-black text-indigo-600 italic">03. ÜRÜN/PAKET SEÇİMİ</p>
+              <div className="grid gap-6 md:grid-cols-2">
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 block mb-2">Bölüm Üst Yazı</label>
+                  <input className="w-full rounded-2xl border-2 border-stone-50 bg-stone-50 p-4 font-bold text-sm focus:border-indigo-600 focus:bg-white transition-all" value={settings.productsSubtitle} onChange={e => setSettings({ ...settings, productsSubtitle: e.target.value })} />
+                </div>
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 block mb-2">Ana Başlık</label>
+                  <input className="w-full rounded-2xl border-2 border-stone-50 bg-stone-50 p-4 font-bold text-sm focus:border-indigo-600 focus:bg-white transition-all" value={settings.productsTitle} onChange={e => setSettings({ ...settings, productsTitle: e.target.value })} />
+                </div>
+              </div>
+           </div>
+
+           {/* Order */}
+           <div className="pt-8 border-t border-slate-100 space-y-6">
+              <p className="text-xs font-black text-indigo-600 italic">04. SİPARİŞ FORMU</p>
+              <div className="grid gap-6 md:grid-cols-2">
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 block mb-2">Bölüm Üst Yazı</label>
+                  <input className="w-full rounded-2xl border-2 border-stone-50 bg-stone-50 p-4 font-bold text-sm focus:border-indigo-600 focus:bg-white transition-all" value={settings.orderSubtitle} onChange={e => setSettings({ ...settings, orderSubtitle: e.target.value })} />
+                </div>
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 block mb-2">Ana Başlık</label>
+                  <input className="w-full rounded-2xl border-2 border-stone-50 bg-stone-50 p-4 font-bold text-sm focus:border-indigo-600 focus:bg-white transition-all" value={settings.orderTitle} onChange={e => setSettings({ ...settings, orderTitle: e.target.value })} />
+                </div>
+              </div>
+           </div>
         </div>
 
         {/* Global Settings */}
         <div className="rounded-[2.5rem] border border-stone-200 bg-white p-8 shadow-sm">
-          <h3 className="mb-6 text-sm font-black uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-4">Genel Bilgiler</h3>
-          
+          <h3 className="mb-6 text-sm font-black uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-4">İletişim Bilgileri</h3>
           <div className="grid gap-6">
              <div>
               <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 ml-1 block mb-2">Firma / Marka Adı</label>
-              <input
-                className="w-full rounded-2xl border-2 border-stone-50 bg-stone-50 p-4 font-bold text-sm focus:border-stone-900 focus:bg-white focus:outline-none transition-all"
-                value={settings.title}
-                onChange={e => setSettings({ ...settings, title: e.target.value })}
-              />
+              <input className="w-full rounded-2xl border-2 border-stone-50 bg-stone-50 p-4 font-bold text-sm focus:border-stone-900 focus:bg-white transition-all" value={settings.title} onChange={e => setSettings({ ...settings, title: e.target.value })} />
             </div>
-
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 ml-1 block mb-2">İletişim Tel</label>
-                <input
-                  className="w-full rounded-2xl border-2 border-stone-50 bg-stone-50 p-4 font-bold text-sm focus:border-stone-900 focus:bg-white focus:outline-none transition-all"
-                  value={settings.phone}
-                  onChange={e => setSettings({ ...settings, phone: e.target.value })}
-                />
+                <input className="w-full rounded-2xl border-2 border-stone-50 bg-stone-50 p-4 font-bold text-sm focus:border-stone-900 focus:bg-white transition-all" value={settings.phone} onChange={e => setSettings({ ...settings, phone: e.target.value })} />
               </div>
               <div>
                 <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 ml-1 block mb-2">WhatsApp No</label>
-                <input
-                  className="w-full rounded-2xl border-2 border-stone-50 bg-stone-50 p-4 font-bold text-sm focus:border-stone-900 focus:bg-white focus:outline-none transition-all"
-                  value={settings.whatsapp}
-                  onChange={e => setSettings({ ...settings, whatsapp: e.target.value })}
-                />
+                <input className="w-full rounded-2xl border-2 border-stone-50 bg-stone-50 p-4 font-bold text-sm focus:border-stone-900 focus:bg-white transition-all" value={settings.whatsapp} onChange={e => setSettings({ ...settings, whatsapp: e.target.value })} />
               </div>
             </div>
-            
             <div>
               <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 ml-1 block mb-2">Alt Bilgi (Footer)</label>
-              <textarea
-                className="w-full rounded-2xl border-2 border-stone-50 bg-stone-50 p-4 font-bold text-sm focus:border-stone-900 focus:bg-white focus:outline-none transition-all"
-                value={settings.footerText}
-                onChange={e => setSettings({ ...settings, footerText: e.target.value })}
-              />
+              <textarea className="w-full rounded-2xl border-2 border-stone-50 bg-stone-50 p-4 font-bold text-sm focus:border-stone-900 focus:bg-white transition-all" value={settings.footerText} onChange={e => setSettings({ ...settings, footerText: e.target.value })} />
             </div>
           </div>
         </div>
 
-        <button type="submit" className="w-full rounded-3xl bg-indigo-600 py-6 text-sm font-black text-white hover:bg-slate-900 transition-all shadow-2xl shadow-indigo-100 active:scale-[0.98]">
-          BÜTÜN AYARLARI SİTEYE UYGULA
+        <button type="submit" className="w-full rounded-3xl bg-slate-900 py-6 text-sm font-black text-white hover:bg-indigo-600 transition-all shadow-2xl active:scale-[0.98]">
+          AYARLARI SİTEYE UYGULA
         </button>
       </form>
     </div>

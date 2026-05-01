@@ -35,4 +35,12 @@ export interface SiteSettings {
   announcement: string;
   announcementActive: boolean;
   heroImage: string;
+  logo: string;
+  brandColor: string;
+  featuresTitle: string;
+  featuresSubtitle: string;
+  productsTitle: string;
+  productsSubtitle: string;
+  orderTitle: string;
+  orderSubtitle: string;
 }
