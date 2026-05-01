@@ -25,7 +25,8 @@ import {
   Filter,
   Download,
   Calendar,
-  Layers
+  Layers,
+  Sparkles
 } from "lucide-react";
 import { cn, formatCurrency } from "../lib/utils";
 
