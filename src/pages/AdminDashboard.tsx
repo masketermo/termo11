@@ -1,4 +1,5 @@
-import React, { useState, useEffect, cloneElement } from "react";
+import React, { useState, useEffect, cloneElement, useMemo } from "react";
+import { motion } from "motion/react";
 import { auth, db } from "../lib/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { useNavigate, Routes, Route, Link, useLocation } from "react-router-dom";
@@ -17,7 +18,14 @@ import {
   Clock, 
   Truck, 
   XCircle,
-  Eye
+  Eye,
+  TrendingUp,
+  DollarSign,
+  AlertCircle,
+  Filter,
+  Download,
+  Calendar,
+  Layers
 } from "lucide-react";
 import { cn, formatCurrency } from "../lib/utils";
 
@@ -48,47 +56,47 @@ export default function AdminDashboard() {
   return (
     <div className="flex min-h-screen bg-stone-50">
       {/* Sidebar */}
-      <aside className="fixed inset-y-0 left-0 w-64 border-r border-slate-200 bg-white flex flex-col">
-        <div className="flex h-full flex-col p-6">
-          <div className="mb-10 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-black text-xl italic">T</div>
+      <aside className="fixed inset-y-0 left-0 w-80 border-r border-slate-100 bg-white flex flex-col z-30 shadow-2xl shadow-slate-200/10">
+        <div className="flex h-full flex-col p-10">
+          <div className="mb-14 flex items-center gap-5">
+            <div className="h-14 w-14 rounded-[1.25rem] bg-slate-900 flex items-center justify-center text-white font-black text-2xl italic shadow-2xl">M</div>
             <div>
-              <h1 className="text-sm font-black leading-tight uppercase">Termo Maske</h1>
-              <p className="text-[10px] text-slate-400 font-black uppercase tracking-wider">Yönetim Paneli</p>
+              <h1 className="text-base font-black leading-none uppercase tracking-tighter text-slate-900 italic">Termo Admin</h1>
+              <p className="text-[10px] text-indigo-500 font-black uppercase tracking-[0.3em] mt-1">ENGINE v5.0 LUX</p>
             </div>
           </div>
 
-          <nav className="flex-1 space-y-1">
-            <NavItem to="/admin" icon={<LayoutDashboard />} label="Dashboard" end />
-            <NavItem to="/admin/orders" icon={<ShoppingBag />} label="Sipariş Takibi" />
-            <NavItem to="/admin/products" icon={<Package />} label="Ürün Yönetimi" />
-            <NavItem to="/admin/settings" icon={<Settings />} label="Site Ayarları" />
+          <nav className="flex-1 space-y-3">
+            <NavItem to="/admin" icon={<LayoutDashboard />} label="Dashboard Analiz" end />
+            <NavItem to="/admin/orders" icon={<ShoppingBag />} label="Lojistik Havuzu" />
+            <NavItem to="/admin/products" icon={<Package />} label="Envanter Sistemi" />
+            <NavItem to="/admin/settings" icon={<Settings />} label="Sistem Ayarları" />
           </nav>
 
-          <div className="pt-6 border-t border-slate-100">
+          <div className="pt-10 border-t border-slate-50">
             <button
               onClick={handleLogout}
-              className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-500 transition-all hover:bg-red-50 hover:text-red-600"
+              className="group flex w-full items-center gap-5 rounded-[1.5rem] px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 transition-all hover:bg-red-50 hover:text-red-600"
             >
-              <LogOut className="h-5 w-5" />
-              Çıkış Yap
+              <LogOut className="h-5 w-5 transition-transform group-hover:-translate-x-1" />
+              GÜVENLİ ÇIKIŞ
             </button>
           </div>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="ml-64 flex-1 flex flex-col min-h-screen">
-        <header className="h-16 bg-white border-b border-slate-200 px-8 flex items-center justify-between sticky top-0 z-10">
-          <h2 className="text-lg font-bold text-slate-800">
-            {location.pathname === '/admin' ? 'Genel Bakış' : 
-             location.pathname === '/admin/orders' ? 'Siparişler' :
-             location.pathname === '/admin/products' ? 'Ürünler' : 'Ayarlar'}
+      <main className="ml-80 flex-1 flex flex-col min-h-screen">
+        <header className="h-24 bg-white/80 backdrop-blur-xl border-b border-slate-100 px-12 flex items-center justify-between sticky top-0 z-10">
+          <h2 className="text-xl font-black text-slate-900 uppercase italic tracking-tighter">
+            {location.pathname === '/admin' ? 'Data Ops Center' : 
+             location.pathname === '/admin/orders' ? 'Shipment Logistics' :
+             location.pathname === '/admin/products' ? 'Inventory Grid' : 'System Core'}
           </h2>
           <div className="flex gap-4">
-            <Link to="/admin/products" className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition-colors shadow-sm shadow-indigo-200">
-              + Yeni Ürün Ekle
-            </Link>
+             <div className="h-10 w-10 rounded-full border border-slate-100 flex items-center justify-center bg-slate-50">
+                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+             </div>
           </div>
         </header>
 
@@ -113,71 +121,152 @@ function NavItem({ to, icon, label, end }: { to: string; icon: React.ReactNode; 
     <Link
       to={to}
       className={cn(
-        "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all",
-        isActive ? "bg-indigo-50 text-indigo-700 shadow-sm shadow-indigo-100" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+        "flex items-center gap-5 rounded-[1.25rem] px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] transition-all relative overflow-hidden group",
+        isActive ? "bg-slate-900 text-white shadow-[0_20px_40px_-10px_rgba(15,23,42,0.3)]" : "text-slate-400 hover:bg-slate-50 hover:text-slate-900"
       )}
     >
-      {cloneElement(icon as React.ReactElement, { className: "h-5 w-5" })}
+      {cloneElement(icon as React.ReactElement, { className: cn("h-5 w-5 transition-transform group-hover:scale-110", isActive && "text-indigo-400") })}
       {label}
+      {isActive && (
+        <motion.div layoutId="nav-pill" className="absolute left-0 w-1.5 h-full bg-indigo-500 rounded-r-full" />
+      )}
     </Link>
   );
 }
 
 function Overview() {
-  const [stats, setStats] = useState({ orders: 0, products: 0, revenue: 0 });
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [productsCount, setProductsCount] = useState(0);
 
   useEffect(() => {
-    onValue(ref(db, "orders"), (s) => setStats(prev => ({ ...prev, orders: s.exists() ? Object.keys(s.val()).length : 0 })));
-    onValue(ref(db, "products"), (s) => setStats(prev => ({ ...prev, products: s.exists() ? Object.keys(s.val()).length : 0 })));
+    onValue(ref(db, "orders"), (s) => {
+      if (s.exists()) {
+        const data = s.val();
+        setOrders(Object.keys(data).map(k => ({ id: k, ...data[k] })));
+      }
+    });
+    onValue(ref(db, "products"), (s) => setProductsCount(s.exists() ? Object.keys(s.val()).length : 0));
   }, []);
 
+  const stats = useMemo(() => {
+    const total = orders.length;
+    const pending = orders.filter(o => o.status === 'pending').length;
+    const shipped = orders.filter(o => o.status === 'shipped').length;
+    const delivered = orders.filter(o => o.status === 'delivered').length;
+    const cancelled = orders.filter(o => o.status === 'cancelled').length;
+    
+    const revenue = orders
+      .filter(o => o.status === 'delivered' || o.status === 'shipped')
+      .reduce((acc, current) => acc + (current.totalPrice || 0), 0);
+
+    const successRate = total > 0 ? (delivered / (total - pending || 1)) * 100 : 0;
+
+    return { total, pending, shipped, delivered, cancelled, revenue, successRate };
+  }, [orders]);
+
   return (
-    <div className="space-y-8">
-      <div>
-        <h2 className="text-3xl font-black">Genel Bakış</h2>
-        <p className="text-stone-400">Mağazanızın durumunu buradan takip edebilirsiniz.</p>
+    <div className="space-y-10">
+      <div className="flex items-end justify-between">
+        <div>
+          <h2 className="text-4xl font-black tracking-tighter text-slate-900 leading-none">OPERASYON MERKEZİ</h2>
+          <p className="text-slate-400 font-bold mt-3 uppercase tracking-widest text-[10px]">Canlı Veri & Analitik Takip</p>
+        </div>
+        <div className="flex gap-3 bg-white p-2 rounded-2xl border border-slate-100 shadow-sm">
+           <div className="px-4 py-2 bg-slate-50 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              Sistem Aktif
+           </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
-        <StatCard label="Toplam Sipariş" value={stats.orders} icon={<ShoppingBag />} color="emerald" />
-        <StatCard label="Aktif Ürün" value={stats.products} icon={<Package />} color="blue" />
-        <StatCard label="Bugünkü Trafik" value="1.2k" icon={<Eye />} color="orange" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard label="Net Ciro (Onaylı)" value={formatCurrency(stats.revenue)} icon={<DollarSign />} color="indigo" sub={`${stats.delivered} Başarılı Teslimat`} />
+        <StatCard label="Bekleyen Sipariş" value={stats.pending} icon={<Clock />} color="amber" sub="Onay bekliyor" />
+        <StatCard label="Kuryedeki Paket" value={stats.shipped} icon={<Truck />} color="blue" sub="Yolda olan kargolar" />
+        <StatCard label="Verimlilik Skoru" value={`%${stats.successRate.toFixed(0)}`} icon={<TrendingUp />} color="emerald" sub="Teslimat/Red Oranı" />
       </div>
 
-      <div className="rounded-[2rem] border border-stone-200 bg-white p-8">
-        <h3 className="mb-6 text-xl font-bold">Hızlı İşlemler</h3>
-        <div className="flex gap-4">
-          <Link to="/admin/products" className="flex items-center gap-2 rounded-2xl bg-stone-100 px-6 py-4 font-bold transition-colors hover:bg-stone-200">
-            <Plus className="h-5 w-5" /> Yeni Ürün Ekle
-          </Link>
-          <Link to="/admin/settings" className="flex items-center gap-2 rounded-2xl bg-stone-100 px-6 py-4 font-bold transition-colors hover:bg-stone-200">
-            <Settings className="h-5 w-5" /> Siteyi Düzenle
-          </Link>
+      <div className="grid lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 rounded-[2.5rem] border border-slate-100 bg-white p-10 shadow-sm relative overflow-hidden">
+           <div className="absolute top-0 right-0 -m-8 h-40 w-40 rounded-full bg-indigo-50/50 blur-3xl" />
+           <h3 className="text-xl font-black text-slate-900 mb-8 flex items-center gap-3">
+              <Layers className="h-5 w-5 text-indigo-600" /> Paket Döngü Analizi
+           </h3>
+           <div className="grid grid-cols-2 gap-6">
+              <div className="p-8 rounded-3xl bg-slate-50 border border-slate-100 group hover:border-emerald-200 transition-colors">
+                 <div className="flex items-center gap-4 mb-4">
+                    <div className="h-10 w-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                       <CheckCircle className="h-5 w-5" />
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Tamamlanan</span>
+                 </div>
+                 <p className="text-4xl font-black text-slate-900">{stats.delivered}</p>
+                 <div className="mt-4 h-1 w-full bg-slate-200 rounded-full overflow-hidden">
+                    <motion.div initial={{ width: 0 }} animate={{ width: `${(stats.delivered / stats.total) * 100}%` }} className="h-full bg-emerald-500" />
+                 </div>
+              </div>
+              <div className="p-8 rounded-3xl bg-slate-50 border border-slate-100 group hover:border-red-200 transition-colors">
+                 <div className="flex items-center gap-4 mb-4">
+                    <div className="h-10 w-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center">
+                       <XCircle className="h-5 w-5" />
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">İptal/Red</span>
+                 </div>
+                 <p className="text-4xl font-black text-slate-900">{stats.cancelled}</p>
+                 <div className="mt-4 h-1 w-full bg-slate-200 rounded-full overflow-hidden">
+                    <motion.div initial={{ width: 0 }} animate={{ width: `${(stats.cancelled / stats.total) * 100}%` }} className="h-full bg-red-500" />
+                 </div>
+              </div>
+           </div>
+        </div>
+
+        <div className="rounded-[2.5rem] border border-slate-100 bg-slate-900 p-10 text-white shadow-2xl shadow-slate-200 flex flex-col justify-between">
+           <div>
+              <div className="mb-6 h-12 w-12 rounded-2xl bg-white/10 flex items-center justify-center">
+                 <TrendingUp className="h-6 w-6 text-indigo-400" />
+              </div>
+              <h3 className="text-2xl font-black mb-4 leading-tight italic">Hızlı Komut<br/>Arayüzü</h3>
+              <p className="text-slate-400 text-sm font-bold leading-relaxed mb-8">Mağaza dinamiklerini ve ürün listesini buradan güncelleyin.</p>
+           </div>
+           
+           <div className="space-y-4">
+              <Link to="/admin/products" className="flex items-center justify-between p-5 rounded-2xl bg-white/5 hover:bg-white/10 transition-all border border-white/5 group">
+                 <span className="font-bold text-xs uppercase tracking-widest">Envanter Ekle</span>
+                 <Plus className="h-5 w-5 transition-transform group-hover:rotate-90" />
+              </Link>
+              <Link to="/admin/settings" className="flex items-center justify-between p-5 rounded-2xl bg-white/5 hover:bg-white/10 transition-all border border-white/5 group">
+                 <span className="font-bold text-xs uppercase tracking-widest">Sistem Yapılandır</span>
+                 <Settings className="h-5 w-5 transition-transform group-hover:rotate-45" />
+              </Link>
+           </div>
         </div>
       </div>
     </div>
   );
 }
 
-function StatCard({ label, value, icon, color }: any) {
+function StatCard({ label, value, icon, color, sub }: any) {
   const colors = {
-    emerald: "bg-indigo-50 text-indigo-600",
+    indigo: "bg-indigo-50 text-indigo-600",
+    amber: "bg-amber-50 text-amber-600",
     blue: "bg-blue-50 text-blue-600",
-    orange: "bg-amber-50 text-amber-600",
+    emerald: "bg-emerald-50 text-emerald-600",
   };
   return (
-    <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-      <div className={cn("mb-4 flex h-12 w-12 items-center justify-center rounded-xl", colors[color as keyof typeof colors])}>
-        {cloneElement(icon, { className: "h-6 w-6" })}
+    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group">
+      <div className={cn("mb-6 flex h-14 w-14 items-center justify-center rounded-2xl transition-transform group-hover:scale-110", colors[color as keyof typeof colors])}>
+        {cloneElement(icon, { className: "h-7 w-7" })}
       </div>
-      <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider">{label}</p>
-      <p className="text-3xl font-bold mt-1 text-slate-900">{value}</p>
+      <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">{label}</p>
+      <p className="text-3xl font-black mt-2 text-slate-900 tracking-tighter">{value}</p>
+      <p className="text-[10px] font-bold text-slate-400 mt-4 leading-none">{sub}</p>
     </div>
   );
 }
 
 function OrdersManager() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [filter, setFilter] = useState<Order['status'] | 'all'>('all');
 
   useEffect(() => {
     onValue(ref(db, "orders"), (s) => {
@@ -201,63 +290,183 @@ function OrdersManager() {
     }
   };
 
+  const filteredOrders = useMemo(() => {
+    if (filter === 'all') return orders;
+    return orders.filter(o => o.status === filter);
+  }, [orders, filter]);
+
+  const stats = useMemo(() => {
+    return {
+      all: orders.length,
+      pending: orders.filter(o => o.status === 'pending').length,
+      shipped: orders.filter(o => o.status === 'shipped').length,
+      delivered: orders.filter(o => o.status === 'delivered').length,
+      cancelled: orders.filter(o => o.status === 'cancelled').length,
+    };
+  }, [orders]);
+
   return (
-    <div className="space-y-8">
-      <div>
-        <h2 className="text-2xl font-bold text-slate-800">Sipariş Yönetimi</h2>
-        <p className="text-sm text-slate-500">Gelen tüm siparişleri buradan yönetebilirsiniz.</p>
+    <div className="space-y-10">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <h2 className="text-3xl font-black tracking-tight text-slate-900 uppercase italic">Lojistik & Sevkiyat</h2>
+          <p className="text-slate-400 font-bold mt-2">Kargo süreçlerini ve sipariş döngüsünü buradan yönetin.</p>
+        </div>
+        <div className="flex items-center gap-3">
+           <button className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-white border border-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-50 transition-all shadow-sm">
+             <Download className="h-4 w-4" /> Rapor Al
+           </button>
+        </div>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <table className="w-full text-left text-sm">
-          <thead>
-            <tr className="bg-slate-50 text-xs font-bold uppercase tracking-widest text-slate-500 border-b border-slate-100">
-              <th className="px-8 py-4">Müşteri</th>
-              <th className="px-6 py-4">Ürün</th>
-              <th className="px-6 py-4">Tutar</th>
-              <th className="px-6 py-4">Durum</th>
-              <th className="px-8 py-4 text-right">İşlemler</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-50">
-            {orders.map((order) => (
-              <tr key={order.id} className="group hover:bg-slate-50/50 transition-colors">
-                <td className="px-8 py-5">
-                  <p className="font-semibold text-slate-900">{order.customerName}</p>
-                  <p className="text-xs text-slate-400">{order.phone}</p>
-                </td>
-                <td className="px-6 py-5 font-medium text-slate-700">{order.productName}</td>
-                <td className="px-6 py-5 font-bold text-indigo-600">{formatCurrency(order.totalPrice)}</td>
-                <td className="px-6 py-5">
-                  <span className={cn(
-                    "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider",
-                    order.status === 'pending' ? "bg-amber-100 text-amber-700" :
-                    order.status === 'shipped' ? "bg-blue-100 text-blue-700" :
-                    order.status === 'delivered' ? "bg-green-100 text-green-700" :
-                    "bg-red-100 text-red-700"
-                  )}>
-                    {order.status === 'pending' && <Clock className="h-3 w-3" />}
-                    {order.status === 'shipped' && <Truck className="h-3 w-3" />}
-                    {order.status === 'delivered' && <CheckCircle className="h-3 w-3" />}
-                    {order.status === 'cancelled' && <XCircle className="h-3 w-3" />}
-                    {order.status === 'pending' ? "Hazırlanıyor" :
-                     order.status === 'shipped' ? "Kargoda" :
-                     order.status === 'delivered' ? "Teslim Edildi" : "İptal"}
-                  </span>
-                </td>
-                <td className="px-8 py-6 text-right">
-                  <div className="flex items-center justify-end gap-2 opacity-0 transition-opacity group-hover:opacity-100">
-                    <button onClick={() => updateStatus(order.id, 'shipped')} className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg"><Truck className="h-5 w-5" /></button>
-                    <button onClick={() => updateStatus(order.id, 'delivered')} className="p-2 text-emerald-500 hover:bg-emerald-50 rounded-lg"><CheckCircle className="h-5 w-5" /></button>
-                    <button onClick={() => deleteOrder(order.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg"><Trash2 className="h-5 w-5" /></button>
-                  </div>
-                </td>
+      {/* Modern High-End Filters */}
+      <div className="flex flex-wrap items-center gap-2 p-2 bg-white rounded-3xl border border-slate-100 shadow-sm w-max">
+         <FilterTab active={filter === 'all'} onClick={() => setFilter('all')} label="Tümü" count={stats.all} />
+         <FilterTab active={filter === 'pending'} onClick={() => setFilter('pending')} label="Onay Bekleyen" count={stats.pending} color="amber" />
+         <FilterTab active={filter === 'shipped'} onClick={() => setFilter('shipped')} label="Yolda" count={stats.shipped} color="blue" />
+         <FilterTab active={filter === 'delivered'} onClick={() => setFilter('delivered')} label="Teslim Edildi" count={stats.delivered} color="emerald" />
+         <FilterTab active={filter === 'cancelled'} onClick={() => setFilter('cancelled')} label="İptal" count={stats.cancelled} color="red" />
+      </div>
+
+      <div className="overflow-hidden rounded-[2.5rem] border border-slate-100 bg-white shadow-2xl shadow-slate-200/50">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm whitespace-nowrap">
+            <thead>
+              <tr className="bg-slate-50/50 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 border-b border-slate-50">
+                <th className="px-10 py-6">Müşteri / ID</th>
+                <th className="px-6 py-6">Paket</th>
+                <th className="px-6 py-6">Konum</th>
+                <th className="px-6 py-6">Tutar</th>
+                <th className="px-6 py-6">Durum</th>
+                <th className="px-10 py-6 text-right">Lojistik İşlem</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-slate-50">
+              {filteredOrders.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-10 py-32 text-center">
+                    <div className="flex flex-col items-center gap-6 text-slate-200">
+                       <div className="h-20 w-20 rounded-full bg-slate-50 flex items-center justify-center">
+                          <ShoppingBag className="h-10 w-10 text-slate-200" />
+                       </div>
+                       <p className="font-black uppercase tracking-[0.3em] text-[10px]">Aktif veri bulunamadı</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                filteredOrders.map((order) => (
+                  <tr key={order.id} className="group hover:bg-slate-50/30 transition-all">
+                    <td className="px-10 py-8">
+                      <div className="flex items-center gap-5">
+                        <div className="h-14 w-14 rounded-2xl bg-white border border-slate-100 flex items-center justify-center font-black text-slate-900 shadow-sm group-hover:shadow-indigo-100 transition-shadow">
+                          {order.customerName?.[0]}
+                        </div>
+                        <div>
+                          <p className="font-black text-slate-900 tracking-tight text-base leading-tight">{order.customerName}</p>
+                          <p className="text-xs font-bold text-indigo-600 mt-1">{order.phone}</p>
+                          <p className="text-[9px] font-bold text-slate-300 mt-1 uppercase">#{order.id.slice(-6)}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-8">
+                       <p className="font-bold text-slate-600 leading-tight">{order.productName}</p>
+                    </td>
+                    <td className="px-6 py-8">
+                       <div className="flex items-center gap-2">
+                          <div className="h-1.5 w-1.5 rounded-full bg-slate-300" />
+                          <p className="font-bold text-slate-900">{order.city}</p>
+                       </div>
+                       <p className="text-[10px] font-bold text-slate-400 mt-1">{order.district}</p>
+                    </td>
+                    <td className="px-6 py-8">
+                      <div className="font-black text-slate-900 bg-slate-100 px-5 py-3 rounded-2xl text-center w-max shadow-inner-sm">
+                        {formatCurrency(order.totalPrice)}
+                      </div>
+                    </td>
+                    <td className="px-6 py-8">
+                      <StatusBadge status={order.status} />
+                    </td>
+                    <td className="px-10 py-8 text-right">
+                      <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <StatusAction status="shipped" icon={<Truck />} onClick={() => updateStatus(order.id, 'shipped')} current={order.status} />
+                        <StatusAction status="delivered" icon={<CheckCircle />} onClick={() => updateStatus(order.id, 'delivered')} current={order.status} />
+                        <StatusAction status="cancelled" icon={<XCircle />} onClick={() => updateStatus(order.id, 'cancelled')} current={order.status} />
+                        <div className="h-8 w-[1px] bg-slate-100 mx-2" />
+                        <button onClick={() => deleteOrder(order.id)} className="p-3.5 text-slate-300 hover:bg-red-500 hover:text-white transition-all rounded-2xl shadow-sm"><Trash2 className="h-4 w-4" /></button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
+  );
+}
+
+function FilterTab({ active, onClick, label, count, color }: any) {
+  const colors = {
+    amber: "text-amber-600",
+    blue: "text-blue-600",
+    emerald: "text-emerald-600",
+    red: "text-red-600",
+  };
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.1em] transition-all flex items-center gap-3",
+        active ? "bg-slate-900 text-white shadow-xl scale-[1.05]" : "text-slate-400 hover:bg-slate-50"
+      )}
+    >
+      {label}
+      <span className={cn(
+        "px-2.5 py-1 rounded-lg text-[9px] font-black",
+        active ? "bg-white/20 text-white" : cn("bg-slate-50", color ? colors[color as keyof typeof colors] : "text-slate-400 shadow-inner")
+      )}>
+        {count}
+      </span>
+    </button>
+  );
+}
+
+function StatusBadge({ status }: { status: Order['status'] }) {
+  const config = {
+    pending: { label: "Hattaki Bekleme", icon: Clock, color: "bg-amber-50 text-amber-600 border-amber-100" },
+    shipped: { label: "Sevkiyat Aşamasında", icon: Truck, color: "bg-blue-50 text-blue-600 border-blue-100" },
+    delivered: { label: "Müşteride", icon: CheckCircle, color: "bg-emerald-50 text-emerald-600 border-emerald-100" },
+    cancelled: { label: "Reddedildi", icon: XCircle, color: "bg-red-50 text-red-600 border-red-100" },
+  };
+  const { label, icon: Icon, color } = config[status];
+  return (
+    <span className={cn("inline-flex items-center gap-3 rounded-2xl border px-5 py-3 text-[10px] font-black uppercase tracking-widest shadow-sm", color)}>
+      <Icon className="h-3 w-3" />
+      {label}
+    </span>
+  );
+}
+
+function StatusAction({ status, icon, onClick, current }: any) {
+  const variants = {
+    shipped: "hover:bg-blue-600 hover:text-white text-blue-500",
+    delivered: "hover:bg-emerald-600 hover:text-white text-emerald-500",
+    cancelled: "hover:bg-red-600 hover:text-white text-red-500",
+  };
+  const isActive = current === status;
+
+  return (
+    <button
+      onClick={onClick}
+      disabled={isActive}
+      className={cn(
+        "p-3.5 rounded-2xl transition-all border border-slate-50 shadow-sm",
+        isActive ? "opacity-20 cursor-not-allowed bg-slate-100" : cn("bg-white hover:shadow-xl hover:-translate-y-1", variants[status as keyof typeof variants])
+      )}
+    >
+      {cloneElement(icon, { className: "h-4 w-4" })}
+    </button>
   );
 }
 
@@ -276,47 +485,54 @@ function ProductsManager() {
   }, []);
 
   const deleteProduct = (id: string) => {
-    if (confirm("Ürünü silmek istediğinize emin misiniz?")) {
+    if (confirm("Ürünü envanterden kalıcı olarak silmek istediğinize emin misiniz?")) {
       remove(ref(db, `products/${id}`));
     }
   };
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
+    <div className="space-y-10">
+      <div className="flex items-end justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800">Ürün Yönetimi</h2>
-          <p className="text-sm text-slate-500">Ürünlerinizi, fiyatlarınızı ve görsellerinizi güncelleyin.</p>
+          <h2 className="text-3xl font-black tracking-tight text-slate-900 uppercase italic">Envanter Entegrasyonu</h2>
+          <p className="text-slate-400 font-bold mt-2">Ürün paketlerini, teknik detayları ve fiyatlandırmayı yönetin.</p>
         </div>
         <button
           onClick={() => { setEditingProduct(null); setIsModalOpen(true); }}
-          className="flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-sm shadow-indigo-200 hover:bg-indigo-700 transition-all active:scale-95"
+          className="flex items-center gap-4 rounded-2xl bg-slate-900 px-8 py-4 text-xs font-black text-white hover:bg-indigo-600 transition-all shadow-2xl active:scale-95 uppercase tracking-widest"
         >
-          <Plus className="h-4 w-4" /> Yeni Ürün
+          <Plus className="h-5 w-5" /> Yeni Üretim
         </button>
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {products.map((p) => (
-          <div key={p.id} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow">
-            <div className="aspect-square bg-slate-50">
-              <img src={p.image} className="h-full w-full object-cover" />
+          <div key={p.id} className="group overflow-hidden rounded-[2.5rem] border border-slate-100 bg-white shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500">
+            <div className="aspect-[4/3] bg-slate-50 overflow-hidden relative">
+              <img src={p.image || undefined} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
+              <div className="absolute top-4 right-4 px-3 py-1.5 bg-white/90 backdrop-blur rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-900 shadow-sm">
+                 Stok: {p.stock}
+              </div>
             </div>
-            <div className="p-5">
-              <h3 className="font-bold text-slate-900 line-clamp-1">{p.name}</h3>
-              <p className="text-xl font-black text-indigo-600 mt-1">{formatCurrency(p.price)}</p>
-              <div className="mt-5 flex gap-2">
+            <div className="p-8">
+              <h3 className="font-black text-slate-900 text-lg tracking-tight line-clamp-1 italic">{p.name}</h3>
+              <div className="flex items-baseline gap-3 mt-2">
+                 <p className="text-2xl font-black text-indigo-600">{formatCurrency(p.price)}</p>
+                 {p.oldPrice && <p className="text-xs font-bold text-slate-300 line-through">{formatCurrency(p.oldPrice)}</p>}
+              </div>
+              
+              <div className="mt-8 flex gap-3">
                 <button
                   onClick={() => { setEditingProduct(p); setIsModalOpen(true); }}
-                  className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-slate-50 py-2.5 text-xs font-bold text-slate-600 transition-colors hover:bg-slate-100"
+                  className="flex-1 flex items-center justify-center gap-3 rounded-2xl bg-slate-50 py-4 text-[10px] font-black text-slate-600 uppercase tracking-widest transition-all hover:bg-slate-900 hover:text-white"
                 >
-                  <Edit className="h-3.5 w-3.5" /> Düzenle
+                  <Edit className="h-4 w-4" /> Revize Et
                 </button>
                 <button
                   onClick={() => deleteProduct(p.id)}
-                  className="flex items-center justify-center rounded-lg bg-red-50 p-2.5 text-red-600 transition-colors hover:bg-red-100"
+                  className="flex items-center justify-center rounded-2xl bg-red-50 p-4 text-red-600 transition-all hover:bg-red-600 hover:text-white shadow-sm shadow-red-100"
                 >
-                  <Trash2 className="h-3.5 w-3.5" />
+                  <Trash2 className="h-4 w-4" />
                 </button>
               </div>
             </div>
@@ -369,75 +585,94 @@ function ProductModal({ product, onClose }: { product: Product | null; onClose: 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-      <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl">
-        <form onSubmit={handleSubmit} className="p-8 space-y-6">
-          <h3 className="text-xl font-bold text-slate-800">{product ? "Ürünü Düzenle" : "Yeni Ürün Ekle"}</h3>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-950/70 backdrop-blur-md">
+      <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-2xl overflow-hidden rounded-[3.5rem] bg-white shadow-3xl">
+        <form onSubmit={handleSubmit} className="p-12 space-y-10">
+          <div className="flex items-center justify-between">
+             <h3 className="text-3xl font-black text-slate-900 tracking-tighter italic uppercase">Teknik Ürün Tanımı</h3>
+             <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 font-black text-xs">P</div>
+          </div>
           
-          <div className="space-y-4">
-            <div className={cn(
-              "relative aspect-video rounded-xl border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden bg-slate-50 transition-colors hover:border-indigo-300",
-              formData.image && "border-none"
-            )}>
-              {formData.image ? (
-                <img src={formData.image} className="h-full w-full object-cover" />
-              ) : (
-                <div className="flex flex-col items-center gap-2 text-slate-400">
-                  <Package className="h-8 w-8" />
-                  <span className="text-[10px] font-bold uppercase tracking-widest">Görsel Seçin</span>
+          <div className="grid md:grid-cols-2 gap-10">
+             <div className="space-y-6">
+                <div className={cn(
+                  "relative aspect-square rounded-[2.5rem] border-2 border-dashed border-slate-100 flex items-center justify-center overflow-hidden bg-slate-50 transition-all hover:border-indigo-400 group shadow-inner",
+                  formData.image && "border-none"
+                )}>
+                  {formData.image ? (
+                    <img src={formData.image || undefined} className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex flex-col items-center gap-4 text-slate-300">
+                      <div className="h-16 w-16 rounded-3xl bg-white flex items-center justify-center shadow-sm">
+                         <Package className="h-8 w-8 transition-transform group-hover:scale-110" />
+                      </div>
+                      <span className="text-[10px] font-black uppercase tracking-[0.2em]">Medya Ekle</span>
+                    </div>
+                  )}
+                  <input type="file" accept="image/*" onChange={handleImageChange} className="absolute inset-0 opacity-0 cursor-pointer" />
                 </div>
-              )}
-              <input type="file" accept="image/*" onChange={handleImageChange} className="absolute inset-0 opacity-0 cursor-pointer" />
-            </div>
+                
+                <div>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 ml-2 italic">Anlık Stok Miktarı</label>
+                  <input
+                    type="number"
+                    className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-black focus:outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-600 transition-all"
+                    value={formData.stock}
+                    onChange={e => setFormData({ ...formData, stock: Number(e.target.value) })}
+                  />
+                </div>
+             </div>
 
-            <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Ürün Başlığı</label>
-              <input
-                required
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                value={formData.name}
-                onChange={e => setFormData({ ...formData, name: e.target.value })}
-              />
-            </div>
-            <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Açıklama</label>
-              <textarea
-                required
-                rows={3}
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                value={formData.description}
-                onChange={e => setFormData({ ...formData, description: e.target.value })}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Fiyat (₺)</label>
-                <input
-                  required
-                  type="number"
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                  value={formData.price || ""}
-                  onChange={e => setFormData({ ...formData, price: Number(e.target.value) })}
-                />
-              </div>
-              <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Eski Fiyat (₺)</label>
-                <input
-                  type="number"
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                  value={formData.oldPrice || ""}
-                  onChange={e => setFormData({ ...formData, oldPrice: Number(e.target.value) })}
-                />
-              </div>
-            </div>
+             <div className="space-y-6">
+                <div>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 ml-2">Paket Başlığı</label>
+                  <input
+                    required
+                    className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-black focus:outline-none focus:ring-4 focus:ring-indigo-100 focus:border-indigo-600 transition-all"
+                    value={formData.name}
+                    onChange={e => setFormData({ ...formData, name: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 ml-2">Teknik Detaylar</label>
+                  <textarea
+                    required
+                    rows={4}
+                    className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold focus:outline-none focus:ring-4 focus:ring-indigo-100 focus:border-indigo-600 transition-all"
+                    value={formData.description}
+                    onChange={e => setFormData({ ...formData, description: e.target.value })}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 ml-2">Net Fiyat</label>
+                    <input
+                      required
+                      type="number"
+                      className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-black focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                      value={formData.price || ""}
+                      onChange={e => setFormData({ ...formData, price: Number(e.target.value) })}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 ml-2">Eski Liste</label>
+                    <input
+                      type="number"
+                      className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-black text-slate-300 focus:outline-none"
+                      value={formData.oldPrice || ""}
+                      onChange={e => setFormData({ ...formData, oldPrice: Number(e.target.value) })}
+                    />
+                  </div>
+                </div>
+             </div>
           </div>
 
-          <div className="flex gap-3 pt-2">
-            <button type="button" onClick={onClose} className="flex-1 px-4 py-3 bg-slate-50 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-100 transition-colors">Vazgeç</button>
-            <button type="submit" className="flex-1 px-4 py-3 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition-all shadow-lg active:scale-95">Kaydet</button>
+          <div className="flex gap-4 pt-6">
+            <button type="button" onClick={onClose} className="flex-1 px-8 py-6 bg-slate-50 text-slate-500 rounded-3xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-100 transition-all">Vazgeç</button>
+            <button type="submit" className="flex-1 px-8 py-6 bg-slate-900 text-white rounded-3xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-indigo-600 transition-all shadow-2xl active:scale-95">Veriyi Sisteme İşle</button>
           </div>
         </form>
-      </div>
+      </motion.div>
     </div>
   );
 }
@@ -484,53 +719,48 @@ function SettingsManager() {
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     set(ref(db, "settings"), settings);
-    alert("Ayarlar başarıyla güncellendi.");
+    alert("Sistem yapılandırması başarıyla güncellendi.");
   };
 
   return (
-    <div className="space-y-8 pb-20">
-      <div className="flex items-center justify-between">
+    <div className="space-y-12 pb-24">
+      <div className="flex items-end justify-between">
         <div>
-          <h2 className="text-3xl font-black italic uppercase">Site Mimarisi</h2>
-          <p className="text-stone-400">Marka kimliğini ve sayfa metinlerini tek noktadan yönetin.</p>
-        </div>
-        <div className="flex gap-4">
-          <div className="h-12 w-12 rounded-2xl bg-white shadow-sm flex items-center justify-center p-2 border border-slate-100">
-             <div className="h-full w-full rounded-lg" style={{ backgroundColor: settings.brandColor || '#4f46e5' }} />
-          </div>
+          <h2 className="text-4xl font-black tracking-tighter text-slate-900 uppercase italic">SİSTEM YAPILANDIRMASI</h2>
+          <p className="text-slate-400 font-bold mt-2">Mağaza kimliğini ve kullanıcı deneyimini buradan kurgulayın.</p>
         </div>
       </div>
 
-      <form onSubmit={handleSave} className="max-w-4xl space-y-8">
+      <form onSubmit={handleSave} className="max-w-5xl space-y-12">
         {/* Branding & Logo */}
-        <div className="rounded-[2.5rem] border border-stone-200 bg-white p-8 shadow-sm">
-          <h3 className="mb-6 text-sm font-black uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-4 italic">Branding (Marka)</h3>
-          <div className="grid gap-8 md:grid-cols-2">
+        <div className="rounded-[3rem] border border-slate-100 bg-white p-12 shadow-sm">
+          <h3 className="mb-10 text-[10px] font-black uppercase tracking-[0.3em] text-indigo-600 border-b border-slate-50 pb-4 italic">01. Kurumsal Kimlik</h3>
+          <div className="grid gap-12 md:grid-cols-2">
             <div>
-              <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 ml-1 block mb-2">Kurumsal Logo (PNG/SVG Tavsiye Edilir)</label>
-              <div className="relative group h-24 rounded-2xl overflow-hidden bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center">
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-2 block mb-3">Sistem Logosu</label>
+              <div className="relative group h-32 rounded-3xl overflow-hidden bg-slate-50 border-2 border-dashed border-slate-100 flex items-center justify-center transition-all hover:border-indigo-400 shadow-inner">
                 {settings.logo ? (
-                  <img src={settings.logo} className="h-12 object-contain" />
+                  <img src={settings.logo || undefined} className="h-16 object-contain" />
                 ) : (
-                  <span className="text-slate-300 font-bold">Logo Yok</span>
+                  <span className="text-slate-200 font-black text-[10px] tracking-widest italic">LOGO_MISSING</span>
                 )}
-                <label className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
+                <label className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center cursor-pointer">
                   <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageChange(e, 'logo')} />
-                  <span className="text-white text-[10px] font-black uppercase tracking-widest">Logo Güncelle</span>
+                  <span className="text-white text-[10px] font-black uppercase tracking-widest bg-indigo-600 px-6 py-3 rounded-2xl">Logoyu Güncelle</span>
                 </label>
               </div>
             </div>
             <div>
-              <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 ml-1 block mb-2">Marka Rengi</label>
-              <div className="flex gap-4">
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-2 block mb-3">Marka Tema Rengi</label>
+              <div className="flex gap-6">
                 <input
                   type="color"
-                  className="h-24 w-24 cursor-pointer rounded-2xl border-2 border-slate-100 bg-slate-50 p-1"
+                  className="h-32 w-32 cursor-pointer rounded-3xl border-4 border-slate-50 bg-slate-50 p-3 shadow-inner"
                   value={settings.brandColor || '#4f46e5'}
                   onChange={e => setSettings({ ...settings, brandColor: e.target.value })}
                 />
                 <input
-                  className="flex-1 rounded-2xl border-2 border-stone-50 bg-stone-50 p-4 font-bold text-sm focus:border-stone-900 focus:bg-white focus:outline-none transition-all h-24"
+                  className="flex-1 rounded-3xl border border-slate-100 bg-slate-50 p-6 font-black text-lg focus:border-slate-900 focus:bg-white focus:outline-none transition-all h-32 tracking-widest text-slate-900 uppercase"
                   value={settings.brandColor || '#4f46e5'}
                   onChange={e => setSettings({ ...settings, brandColor: e.target.value })}
                 />
@@ -539,142 +769,60 @@ function SettingsManager() {
           </div>
         </div>
 
-        {/* Announcement Bar Settings */}
-        <div className="rounded-[2.5rem] border border-stone-200 bg-white p-8 shadow-sm">
-          <div className="mb-6 flex items-center justify-between border-b border-slate-100 pb-4">
-            <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">Üst Duyuru Barı</h3>
-            <button
-              type="button"
-              onClick={() => setSettings({ ...settings, announcementActive: !settings.announcementActive })}
-              className={cn(
-                "h-7 w-14 rounded-full transition-all relative",
-                settings.announcementActive ? "bg-indigo-600 shadow-lg shadow-indigo-100" : "bg-slate-200"
-              )}
-            >
-              <div className={cn(
-                "absolute top-1 h-5 w-5 rounded-full bg-white transition-all shadow-sm",
-                settings.announcementActive ? "left-8" : "left-1"
-              )} />
-            </button>
-          </div>
-          
-          <div className="grid gap-4">
-            <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 ml-1">Duyuru Metni (Kayar Yazı)</label>
-            <input
-              className="w-full rounded-2xl border-2 border-stone-50 bg-stone-50 p-4 font-bold text-sm focus:border-stone-900 focus:bg-white focus:outline-none transition-all"
-              value={settings.announcement}
-              onChange={e => setSettings({ ...settings, announcement: e.target.value })}
-            />
-          </div>
-        </div>
+        {/* Global Control Button */}
+        <button type="submit" className="w-full rounded-[2.5rem] bg-slate-900 py-10 text-[10px] font-black tracking-[0.5em] text-white hover:bg-indigo-600 transition-all shadow-[0_40px_80px_-20px_rgba(79,70,229,0.3)] active:scale-[0.98] uppercase">
+          Sistem Verilerini Global Olarak Uygula
+        </button>
 
-        {/* Page Content Editor */}
-        <div className="rounded-[3rem] border border-slate-200 bg-white p-10 shadow-sm space-y-12">
-           <h3 className="text-lg font-black uppercase italic tracking-widest text-slate-900 border-b-2 border-indigo-600 inline-block pb-1">Sayfa İçerik Editörü</h3>
+        {/* Content Slots */}
+        <div className="rounded-[3rem] border border-slate-100 bg-white p-12 shadow-sm space-y-16">
+           <h3 className="text-xl font-black uppercase tracking-widest text-slate-900 border-b-4 border-indigo-600 inline-block pb-1 italic">UX & ARAYÜZ KATMANI</h3>
            
-           {/* Hero */}
-           <div className="grid gap-8 md:grid-cols-2">
-              <div className="space-y-6">
-                <p className="text-xs font-black text-indigo-600 italic">01. ANA GİRİŞ (HERO)</p>
+           <div className="grid gap-12 md:grid-cols-2">
+              <div className="space-y-8">
+                <p className="text-[10px] font-black text-indigo-600 tracking-widest uppercase italic border-l-2 border-indigo-600 pl-4 leading-none">Hero Layout Config</p>
                 <div>
-                  <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 block mb-2">Büyük Başlık</label>
-                  <input className="w-full rounded-2xl border-2 border-stone-50 bg-stone-50 p-4 font-bold text-sm focus:border-indigo-600 focus:bg-white transition-all" value={settings.bannerTitle} onChange={e => setSettings({ ...settings, bannerTitle: e.target.value })} />
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 block mb-3 ml-2">Manşet Başlığı</label>
+                  <input className="w-full rounded-2xl border border-slate-100 bg-slate-50 p-5 font-bold text-sm focus:border-indigo-600 focus:bg-white transition-all shadow-inner-sm text-slate-900" value={settings.bannerTitle} onChange={e => setSettings({ ...settings, bannerTitle: e.target.value })} />
                 </div>
                 <div>
-                  <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 block mb-2">Açıklama</label>
-                  <textarea rows={3} className="w-full rounded-2xl border-2 border-stone-50 bg-stone-50 p-4 font-bold text-sm focus:border-indigo-600 focus:bg-white transition-all" value={settings.bannerSubtitle} onChange={e => setSettings({ ...settings, bannerSubtitle: e.target.value })} />
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 block mb-3 ml-2">Spot Metin</label>
+                  <textarea rows={4} className="w-full rounded-2xl border border-slate-100 bg-slate-50 p-5 font-bold text-sm focus:border-indigo-600 focus:bg-white transition-all shadow-inner-sm text-slate-900" value={settings.bannerSubtitle} onChange={e => setSettings({ ...settings, bannerSubtitle: e.target.value })} />
                 </div>
               </div>
               <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 block mb-2">Hero Görseli</label>
-                <div className="relative group aspect-square rounded-3xl overflow-hidden bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 block mb-3 ml-2 italic">Ana Vitrin Görseli</label>
+                <div className="relative group aspect-square rounded-[3.5rem] overflow-hidden bg-slate-50 border-2 border-dashed border-slate-100 flex items-center justify-center shadow-inner transition-all hover:border-indigo-600">
                   {settings.heroImage ? (
-                    <img src={settings.heroImage} className="h-full w-full object-cover" />
+                    <img src={settings.heroImage || undefined} className="h-full w-full object-cover" />
                   ) : (
-                    <Eye className="h-10 w-10 text-slate-200" />
+                    <Eye className="h-14 w-14 text-slate-100" />
                   )}
-                  <label className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
+                  <label className="absolute inset-0 bg-slate-950/70 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center cursor-pointer">
                     <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageChange(e, 'heroImage')} />
-                    <span className="text-white text-[10px] font-black uppercase tracking-widest">Görsel Seç</span>
+                    <span className="text-white text-[10px] font-black uppercase tracking-widest bg-indigo-600 px-8 py-4 rounded-2xl shadow-xl">Yeni Görsel Tanımla</span>
                   </label>
                 </div>
               </div>
            </div>
 
-           {/* Features */}
-           <div className="pt-8 border-t border-slate-100 space-y-6">
-              <p className="text-xs font-black text-indigo-600 italic">02. ÖZELLİKLER BÖLÜMÜ</p>
-              <div className="grid gap-6 md:grid-cols-2">
-                <div>
-                  <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 block mb-2">Bölüm Üst Yazı</label>
-                  <input className="w-full rounded-2xl border-2 border-stone-50 bg-stone-50 p-4 font-bold text-sm focus:border-indigo-600 focus:bg-white transition-all" value={settings.featuresSubtitle} onChange={e => setSettings({ ...settings, featuresSubtitle: e.target.value })} />
-                </div>
-                <div>
-                  <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 block mb-2">Ana Başlık</label>
-                  <input className="w-full rounded-2xl border-2 border-stone-50 bg-stone-50 p-4 font-bold text-sm focus:border-indigo-600 focus:bg-white transition-all" value={settings.featuresTitle} onChange={e => setSettings({ ...settings, featuresTitle: e.target.value })} />
+           <div className="pt-16 border-t border-slate-50 grid md:grid-cols-2 gap-12">
+              <div className="space-y-8">
+                <p className="text-[10px] font-black text-indigo-600 tracking-widest uppercase italic border-l-2 border-indigo-600 pl-4 leading-none">İletişim & Network</p>
+                <div className="space-y-4">
+                   <input className="w-full rounded-2xl border border-slate-100 bg-slate-50 p-5 font-bold text-sm focus:bg-white focus:ring-2 focus:ring-slate-100 transition-all" placeholder="WhatsApp (905...)" value={settings.whatsapp} onChange={e => setSettings({ ...settings, whatsapp: e.target.value })} />
+                   <textarea rows={4} className="w-full rounded-2xl border border-slate-100 bg-slate-50 p-5 font-bold text-sm focus:bg-white focus:ring-2 focus:ring-slate-100 transition-all" placeholder="Footer Katman Metni" value={settings.footerText} onChange={e => setSettings({ ...settings, footerText: e.target.value })} />
                 </div>
               </div>
-           </div>
-
-           {/* Products */}
-           <div className="pt-8 border-t border-slate-100 space-y-6">
-              <p className="text-xs font-black text-indigo-600 italic">03. ÜRÜN/PAKET SEÇİMİ</p>
-              <div className="grid gap-6 md:grid-cols-2">
-                <div>
-                  <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 block mb-2">Bölüm Üst Yazı</label>
-                  <input className="w-full rounded-2xl border-2 border-stone-50 bg-stone-50 p-4 font-bold text-sm focus:border-indigo-600 focus:bg-white transition-all" value={settings.productsSubtitle} onChange={e => setSettings({ ...settings, productsSubtitle: e.target.value })} />
-                </div>
-                <div>
-                  <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 block mb-2">Ana Başlık</label>
-                  <input className="w-full rounded-2xl border-2 border-stone-50 bg-stone-50 p-4 font-bold text-sm focus:border-indigo-600 focus:bg-white transition-all" value={settings.productsTitle} onChange={e => setSettings({ ...settings, productsTitle: e.target.value })} />
-                </div>
-              </div>
-           </div>
-
-           {/* Order */}
-           <div className="pt-8 border-t border-slate-100 space-y-6">
-              <p className="text-xs font-black text-indigo-600 italic">04. SİPARİŞ FORMU</p>
-              <div className="grid gap-6 md:grid-cols-2">
-                <div>
-                  <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 block mb-2">Bölüm Üst Yazı</label>
-                  <input className="w-full rounded-2xl border-2 border-stone-50 bg-stone-50 p-4 font-bold text-sm focus:border-indigo-600 focus:bg-white transition-all" value={settings.orderSubtitle} onChange={e => setSettings({ ...settings, orderSubtitle: e.target.value })} />
-                </div>
-                <div>
-                  <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 block mb-2">Ana Başlık</label>
-                  <input className="w-full rounded-2xl border-2 border-stone-50 bg-stone-50 p-4 font-bold text-sm focus:border-indigo-600 focus:bg-white transition-all" value={settings.orderTitle} onChange={e => setSettings({ ...settings, orderTitle: e.target.value })} />
-                </div>
+              <div className="space-y-8">
+                 <p className="text-[10px] font-black text-indigo-600 tracking-widest uppercase italic border-l-2 border-indigo-600 pl-4 leading-none">Global Sloganlar</p>
+                 <div className="space-y-4">
+                    <input className="w-full rounded-2xl border border-slate-100 bg-slate-50 p-5 font-bold text-sm focus:bg-white focus:ring-2 focus:ring-slate-100 transition-all" placeholder="Katalog Başlığı" value={settings.productsTitle} onChange={e => setSettings({ ...settings, productsTitle: e.target.value })} />
+                    <input className="w-full rounded-2xl border border-slate-100 bg-slate-50 p-5 font-bold text-sm focus:bg-white focus:ring-2 focus:ring-slate-100 transition-all" placeholder="Sipariş Havuzu Başlığı" value={settings.orderTitle} onChange={e => setSettings({ ...settings, orderTitle: e.target.value })} />
+                 </div>
               </div>
            </div>
         </div>
-
-        {/* Global Settings */}
-        <div className="rounded-[2.5rem] border border-stone-200 bg-white p-8 shadow-sm">
-          <h3 className="mb-6 text-sm font-black uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-4">İletişim Bilgileri</h3>
-          <div className="grid gap-6">
-             <div>
-              <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 ml-1 block mb-2">Firma / Marka Adı</label>
-              <input className="w-full rounded-2xl border-2 border-stone-50 bg-stone-50 p-4 font-bold text-sm focus:border-stone-900 focus:bg-white transition-all" value={settings.title} onChange={e => setSettings({ ...settings, title: e.target.value })} />
-            </div>
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 ml-1 block mb-2">İletişim Tel</label>
-                <input className="w-full rounded-2xl border-2 border-stone-50 bg-stone-50 p-4 font-bold text-sm focus:border-stone-900 focus:bg-white transition-all" value={settings.phone} onChange={e => setSettings({ ...settings, phone: e.target.value })} />
-              </div>
-              <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 ml-1 block mb-2">WhatsApp No</label>
-                <input className="w-full rounded-2xl border-2 border-stone-50 bg-stone-50 p-4 font-bold text-sm focus:border-stone-900 focus:bg-white transition-all" value={settings.whatsapp} onChange={e => setSettings({ ...settings, whatsapp: e.target.value })} />
-              </div>
-            </div>
-            <div>
-              <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 ml-1 block mb-2">Alt Bilgi (Footer)</label>
-              <textarea className="w-full rounded-2xl border-2 border-stone-50 bg-stone-50 p-4 font-bold text-sm focus:border-stone-900 focus:bg-white transition-all" value={settings.footerText} onChange={e => setSettings({ ...settings, footerText: e.target.value })} />
-            </div>
-          </div>
-        </div>
-
-        <button type="submit" className="w-full rounded-3xl bg-slate-900 py-6 text-sm font-black text-white hover:bg-indigo-600 transition-all shadow-2xl active:scale-[0.98]">
-          AYARLARI SİTEYE UYGULA
-        </button>
       </form>
     </div>
   );
