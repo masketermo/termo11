@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "motion/react";
 import {
   ShoppingCart, Phone, Mail, Instagram, MessageCircle,
   ChevronRight, Truck, ShieldCheck, Star, ArrowRight,
-  CheckCircle2, Zap, Package, Award, ChevronDown, Droplet, Sun, Leaf, Sparkles, Users, ThumbsUp, Clock
+  CheckCircle2, Zap, Package, Award, ChevronDown, Droplet, Sun, Leaf, Sparkles, Users, ThumbsUp, Clock, User, StarHalf
 } from "lucide-react";
 import { cn, formatCurrency } from "../lib/utils";
 
@@ -25,8 +25,8 @@ function Badge({ children, style }: { children: React.ReactNode; style?: React.C
 
 function FeaturePill({ icon: Icon, label }: { icon: React.ElementType; label: string }) {
   return (
-    <div className="flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-xs font-semibold text-emerald-700 backdrop-blur-sm border border-emerald-100">
-      <Icon className="h-3.5 w-3.5 text-emerald-600" />
+    <div className="flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-sm px-4 py-2 text-xs font-semibold text-white border border-white/20">
+      <Icon className="h-3.5 w-3.5 text-white/80" />
       {label}
     </div>
   );
@@ -66,6 +66,24 @@ function TextAreaField({
   );
 }
 
+// Star rating component
+function StarRating({ rating }: { rating: number }) {
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = rating % 1 !== 0;
+  
+  return (
+    <div className="flex items-center gap-0.5">
+      {Array.from({ length: fullStars }).map((_, i) => (
+        <Star key={i} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+      ))}
+      {hasHalfStar && <StarHalf className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />}
+      {Array.from({ length: 5 - Math.ceil(rating) }).map((_, i) => (
+        <Star key={i} className="h-3.5 w-3.5 text-slate-300" />
+      ))}
+    </div>
+  );
+}
+
 // ─── Main Component ──────────────────────────────────────────────────────────
 
 export default function Home() {
@@ -86,12 +104,20 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  // Mock reviews data
+  // Extended reviews data - 12 reviews
   const reviews = [
-    { id: 1, name: "Ayşe Yılmaz", rating: 5, text: "Cildim gerçekten parladı! 2 hafta içinde farkı gördüm.", days: 3 },
-    { id: 2, name: "Mehmet Demir", rating: 5, text: "Sivilcelerim söndü, cildim pürüzsüzleşti. Kesinlikle tavsiye ederim.", days: 5 },
-    { id: 3, name: "Zeynep Kaya", rating: 4, text: "Gözeneklerim küçüldü, cildim çok daha canlı görünüyor.", days: 7 },
-    { id: 4, name: "Can Öztürk", rating: 5, text: "Hyaluronik asit harika! Cildim nem dengesini buldu.", days: 2 },
+    { id: 1, name: "Ayşe Yılmaz", rating: 5, text: "Cildim gerçekten parladı! 2 hafta içinde farkı gördüm. Gözeneklerim çok daha küçük görünüyor.", days: 3, verified: true, location: "İstanbul" },
+    { id: 2, name: "Mehmet Demir", rating: 5, text: "Sivilcelerim söndü, cildim pürüzsüzleşti. Kesinlikle tavsiye ederim. 3. maskemi bitiriyorum.", days: 5, verified: true, location: "Ankara" },
+    { id: 3, name: "Zeynep Kaya", rating: 4, text: "Gözeneklerim küçüldü, cildim çok daha canlı görünüyor. Hyaluronik asit harika bir bileşen.", days: 7, verified: true, location: "İzmir" },
+    { id: 4, name: "Can Öztürk", rating: 5, text: "İlk kullanımdan itibaren fark ettim. Cildim nem dengesini buldu ve artık makyajım çok daha güzel duruyor.", days: 2, verified: true, location: "Bursa" },
+    { id: 5, name: "Elif Demirtaş", rating: 5, text: "10 gündür kullanıyorum, cilt tonum eşitlendi ve parlaklık geldi. Kesinlikle tekrar alacağım!", days: 10, verified: true, location: "Antalya" },
+    { id: 6, name: "Burak Yıldız", rating: 4, text: "Siyah noktalarım azaldı, cildim çok daha temiz hissediyorum. İyi ki almışım.", days: 14, verified: false, location: "Kocaeli" },
+    { id: 7, name: "Selin Akçay", rating: 5, text: "Hassas cildim var ama bu maske hiç tahriş yapmadı. Çok memnunum, herkese öneririm!", days: 20, verified: true, location: "İstanbul" },
+    { id: 8, name: "Mert Can", rating: 5, text: "Cildimdeki kızarıklıklar azaldı, daha sağlıklı görünüyor. Fiyatına göre çok iyi bir ürün.", days: 6, verified: true, location: "Ankara" },
+    { id: 9, name: "Deniz Yılmaz", rating: 4, text: "Güzel bir ürün, düzenli kullanımda etkisini gösteriyor. 1 ay oldu hala kullanıyorum.", days: 30, verified: true, location: "İzmir" },
+    { id: 10, name: "Aslı Korkmaz", rating: 5, text: "Maskeden sonra cildim ipek gibi oluyor. Makyaj altına çok iyi hazırlık yapıyor.", days: 4, verified: true, location: "Muğla" },
+    { id: 11, name: "Emre Şahin", rating: 5, text: "Erkek cildinde de harika çalışıyor. Tıraş sonrası tahrişi azalttı.", days: 12, verified: false, location: "Eskişehir" },
+    { id: 12, name: "Burcu Taş", rating: 5, text: "C vitamini sayesinde lekelerim açılmaya başladı. Çok mutluyum!", days: 18, verified: true, location: "İstanbul" },
   ];
 
   // ─── Data fetching ─────────────────────────────────────────────────────────
@@ -156,6 +182,9 @@ export default function Home() {
   const brandColor = settings?.brandColor || "#059669";
   const bgColor = settings?.bgColor || "#ffffff";
 
+  // Calculate average rating
+  const avgRating = (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1);
+
   // ─── Render ────────────────────────────────────────────────────────────────
   return (
     <div
@@ -194,7 +223,7 @@ export default function Home() {
       </AnimatePresence>
 
       {/* ── Header ───────────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-50 border-b border-black/5 backdrop-blur-xl" style={{ backgroundColor: `rgba(${parseInt(bgColor.slice(1,3), 16)}, ${parseInt(bgColor.slice(3,5), 16)}, ${parseInt(bgColor.slice(5,7), 16)}, 0.8)` }}>
+      <header className="sticky top-0 z-50 border-b border-black/5 backdrop-blur-xl" style={{ backgroundColor: `rgba(${parseInt(bgColor.slice(1,3), 16)}, ${parseInt(bgColor.slice(3,5), 16)}, ${parseInt(bgColor.slice(5,7), 16)}, 0.9)` }}>
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
             {settings?.logo ? (
@@ -202,12 +231,12 @@ export default function Home() {
             ) : (
               <>
                 <div
-                  className="flex h-9 w-9 items-center justify-center rounded-xl text-white"
+                  className="flex h-9 w-9 items-center justify-center rounded-xl"
                   style={{ backgroundColor: brandColor }}
                 >
-                  <Leaf className="h-5 w-5" />
+                  <Leaf className="h-5 w-5 text-white" />
                 </div>
-                <span className="text-base font-black tracking-tight text-emerald-800">
+                <span className="text-base font-black tracking-tight text-white mix-blend-difference">
                   {settings?.title || "GlowMask"}
                 </span>
               </>
@@ -220,7 +249,7 @@ export default function Home() {
                 href={`https://wa.me/${settings.whatsapp}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition-all hover:border-emerald-600 hover:bg-emerald-600 hover:text-white"
+                className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold text-white transition-all hover:bg-white hover:text-emerald-700"
               >
                 <MessageCircle className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">WhatsApp</span>
@@ -239,13 +268,17 @@ export default function Home() {
       </header>
 
       {/* ── Hero Section - Prompt 1 ──────────────────────────────────────── */}
-      <section className="relative overflow-hidden pt-16 pb-24 md:pt-28 md:pb-36" style={{ background: `linear-gradient(to bottom right, ${brandColor}0D, var(--bg), var(--bg))` }}>
-        <div className="absolute top-0 right-0 -translate-y-1/3 translate-x-1/3 w-96 h-96 bg-emerald-200 rounded-full opacity-20 blur-3xl" />
+      <section className="relative overflow-hidden pt-16 pb-24 md:pt-28 md:pb-36" style={{ background: `linear-gradient(135deg, ${brandColor} 0%, ${brandColor}CC 50%, ${brandColor}99 100%)` }}>
+        {/* Decorative elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-white/10 rounded-full blur-3xl" />
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-white/5 rounded-full blur-3xl" />
+        </div>
         
         <div className="relative mx-auto max-w-7xl px-6">
-          {/* Green title */}
+          {/* White badge on dark background */}
           <div className="text-center mb-8">
-            <Badge style={{ color: brandColor, borderColor: brandColor + "33", backgroundColor: brandColor + "0D" }}>
+            <Badge style={{ color: "white", borderColor: "rgba(255,255,255,0.3)", backgroundColor: "rgba(255,255,255,0.1)" }}>
               <Sparkles className="h-3 w-3" />
               Cilt Yenilemenin Yeni Formülü
             </Badge>
@@ -258,43 +291,43 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             >
-              <h1 className="mb-6 text-5xl font-black leading-[1.1] tracking-tight text-slate-900 md:text-6xl lg:text-7xl">
-                Yeni <span style={{ color: brandColor }}>GlowMask</span><br />
+              <h1 className="mb-6 text-5xl font-black leading-[1.1] tracking-tight text-white md:text-6xl lg:text-7xl">
+                Yeni <span className="text-white/90">GlowMask</span><br />
                 Maske
               </h1>
 
-              {/* Three bullet points with icons */}
+              {/* Three bullet points with icons - white version */}
               <div className="space-y-5 mb-10">
                 <div className="flex gap-4 items-start">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white">
                     <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/><circle cx="12" cy="12" r="3"/></svg>
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-900">Gözenekleri Derinlemesine Temizler</h3>
-                    <p className="text-sm text-slate-500">Yağ ve kiri arındırır, gözenek görünümünü azaltır.</p>
+                    <h3 className="font-bold text-white">Gözenekleri Derinlemesine Temizler</h3>
+                    <p className="text-sm text-white/70">Yağ ve kiri arındırır, gözenek görünümünü azaltır.</p>
                   </div>
                 </div>
                 <div className="flex gap-4 items-start">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white">
                     <Droplet className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-900">Derin Nemlendirme</h3>
-                    <p className="text-sm text-slate-500">Hyaluronik asit ile cildi nemlendirir ve besler.</p>
+                    <h3 className="font-bold text-white">Derin Nemlendirme</h3>
+                    <p className="text-sm text-white/70">Hyaluronik asit ile cildi nemlendirir ve besler.</p>
                   </div>
                 </div>
                 <div className="flex gap-4 items-start">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white">
                     <Sun className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-900">Cildi Aydınlatır</h3>
-                    <p className="text-sm text-slate-500">C vitamini ile renk tonunu eşitler ve parlaklık verir.</p>
+                    <h3 className="font-bold text-white">Cildi Aydınlatır</h3>
+                    <p className="text-sm text-white/70">C vitamini ile renk tonunu eşitler ve parlaklık verir.</p>
                   </div>
                 </div>
               </div>
 
-              {/* Trust signals */}
+              {/* Trust signals - white version */}
               <div className="mb-8 flex flex-wrap items-center gap-3">
                 <FeaturePill icon={Truck} label="Aynı Gün Kargo" />
                 <FeaturePill icon={ShieldCheck} label="Kapıda Ödeme" />
@@ -305,8 +338,7 @@ export default function Home() {
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                 <button
                   onClick={() => orderFormRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })}
-                  className="group flex items-center justify-center gap-3 rounded-2xl px-8 py-4 text-sm font-bold text-white transition-all hover:opacity-90 active:scale-95"
-                  style={{ backgroundColor: brandColor }}
+                  className="group flex items-center justify-center gap-3 rounded-2xl bg-white px-8 py-4 text-sm font-bold text-emerald-700 transition-all hover:scale-105 active:scale-95 shadow-lg"
                 >
                   HEMEN SİPARİŞ VER
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -317,60 +349,42 @@ export default function Home() {
                       <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
                     ))}
                   </div>
-                  <span className="text-sm font-semibold text-slate-700">4.9/5</span>
-                  <span className="text-xs text-slate-400">(2.400+ yorum)</span>
-                  <span className="ml-2 inline-block rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-700">%25 İNDİRİM</span>
+                  <span className="text-sm font-semibold text-white">4.9/5</span>
+                  <span className="text-xs text-white/60">(8.400+ yorum)</span>
+                  <span className="ml-2 inline-block rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold text-white backdrop-blur-sm">%25 İNDİRİM</span>
                 </div>
               </div>
             </motion.div>
 
-            {/* Right – smiling model with mask */}
+            {/* Right – smiling model with mask (no packaging) */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.9, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
               className="relative"
             >
-              <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-100 to-slate-100 aspect-[4/5] shadow-2xl shadow-slate-200">
+              <div className="relative overflow-hidden rounded-3xl aspect-[4/5] shadow-2xl">
                 {settings?.heroImage ? (
                   <img src={settings.heroImage || undefined} alt="Gülümseyen model" className="h-full w-full object-cover" />
                 ) : (
-                  <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-emerald-200 to-emerald-100">
+                  <div className="flex h-full w-full flex-col items-center justify-center bg-white/20 backdrop-blur-sm">
                     <div className="rounded-full bg-white/30 p-6 mb-4">
-                      <Leaf className="h-16 w-16 text-emerald-700" />
+                      <Sparkles className="h-16 w-16 text-white" />
                     </div>
-                    <p className="text-emerald-800 font-semibold">Maske Uygulaması</p>
+                    <p className="text-white font-semibold">Maske Uygulaması</p>
                   </div>
                 )}
               </div>
-              {/* Product jar */}
-              <motion.div
-                initial={{ opacity: 0, x: 16, y: 8 }}
-                animate={{ opacity: 1, x: 0, y: 0 }}
-                transition={{ delay: 0.5, duration: 0.6 }}
-                className="absolute -bottom-6 -right-6 rounded-2xl border border-slate-100 bg-white p-4 shadow-xl"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="h-14 w-14 rounded-xl bg-emerald-100 flex items-center justify-center">
-                    <Package className="h-7 w-7 text-emerald-700" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-slate-400">Ambalajlı</p>
-                    <p className="font-bold text-slate-900">GlowMask Kavanoz</p>
-                    <p className="text-xs text-emerald-600 font-semibold">50 ml</p>
-                  </div>
-                </div>
-              </motion.div>
             </motion.div>
           </div>
         </div>
       </section>
 
       {/* ── Before-After Section - Prompt 2 ───────────────────────────────── */}
-      <section className="py-24 border-y border-black/5" style={{ backgroundColor: "var(--bg)" }}>
+      <section className="py-24" style={{ backgroundColor: "var(--bg)" }}>
         <div className="mx-auto max-w-7xl px-6">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-black tracking-tight text-emerald-700 md:text-4xl">
+            <h2 className="text-3xl font-black tracking-tight md:text-4xl" style={{ color: brandColor }}>
               Zararsız ve Etkili Olduğu Kanıtlandı
             </h2>
           </div>
@@ -379,7 +393,7 @@ export default function Home() {
             {/* Before-After comparison */}
             <div>
               <div className="grid grid-cols-2 gap-4">
-                <div className="rounded-2xl overflow-hidden bg-slate-100">
+                <div className="rounded-2xl overflow-hidden bg-slate-100 shadow-lg">
                   <div className="aspect-[3/4] bg-gradient-to-br from-rose-100 to-slate-200 flex items-center justify-center relative">
                     {settings?.beforeImage ? (
                       <img src={settings.beforeImage} alt="Önce" className="h-full w-full object-cover" />
@@ -390,25 +404,25 @@ export default function Home() {
                       </div>
                     )}
                   </div>
-                  <div className="p-3 text-center bg-rose-50 border-t border-rose-100">
-                    <span className="text-xs font-bold text-rose-600 uppercase tracking-widest">ÖNCE</span>
+                  <div className="p-3 text-center" style={{ backgroundColor: brandColor + "15" }}>
+                    <span className="text-xs font-bold uppercase tracking-widest" style={{ color: brandColor }}>ÖNCE</span>
                   </div>
                 </div>
-                <div className="rounded-2xl overflow-hidden bg-slate-100">
+                <div className="rounded-2xl overflow-hidden bg-slate-100 shadow-lg">
                   <div className="aspect-[3/4] bg-gradient-to-br from-emerald-100 to-slate-100 flex items-center justify-center relative">
                     {settings?.afterImage ? (
                       <img src={settings.afterImage} alt="Sonra" className="h-full w-full object-cover" />
                     ) : (
                       <div className="text-center p-8">
                         <div className="w-24 h-24 mx-auto rounded-full bg-emerald-200/50 mb-4 flex items-center justify-center">
-                          <Sparkles className="h-8 w-8 text-emerald-600" />
+                          <Sparkles className="h-8 w-8" style={{ color: brandColor }} />
                         </div>
-                        <p className="text-xs font-semibold text-emerald-600">Pürüzsüz & Temiz Cilt</p>
+                        <p className="text-xs font-semibold" style={{ color: brandColor }}>Pürüzsüz & Temiz Cilt</p>
                       </div>
                     )}
                   </div>
-                  <div className="p-3 text-center bg-emerald-50 border-t border-emerald-100">
-                    <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">SONRA</span>
+                  <div className="p-3 text-center" style={{ backgroundColor: brandColor + "15" }}>
+                    <span className="text-xs font-bold uppercase tracking-widest" style={{ color: brandColor }}>SONRA</span>
                   </div>
                 </div>
               </div>
@@ -421,9 +435,9 @@ export default function Home() {
               </p>
               
               {/* Microscope image placeholder */}
-              <div className="flex items-center gap-6 mb-6 bg-slate-50 rounded-2xl p-4 border border-slate-100">
-                <div className="w-20 h-20 rounded-xl bg-emerald-100 flex items-center justify-center">
-                  <svg className="h-10 w-10 text-emerald-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <div className="flex items-center gap-6 mb-6 rounded-2xl p-4 border" style={{ backgroundColor: brandColor + "08", borderColor: brandColor + "20" }}>
+                <div className="w-20 h-20 rounded-xl flex items-center justify-center" style={{ backgroundColor: brandColor + "20" }}>
+                  <svg className="h-10 w-10" style={{ color: brandColor }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <circle cx="12" cy="12" r="8" />
                     <path d="M12 3v2M12 19v2M3 12h2M19 12h2M6.5 6.5l1.5 1.5M16 16l1.5 1.5M6.5 17.5L8 16M16 8l1.5-1.5" />
                     <circle cx="12" cy="12" r="3" />
@@ -437,10 +451,12 @@ export default function Home() {
 
               {/* Ingredient list */}
               <div className="mb-4">
-                <p className="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2"><Leaf className="h-4 w-4 text-emerald-600" /> Doğal Formül</p>
+                <p className="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                  <Leaf className="h-4 w-4" style={{ color: brandColor }} /> Doğal Formül
+                </p>
                 <div className="flex flex-wrap gap-2">
                   {["Kil", "Aloe Vera", "Hyaluronik Asit", "C Vitamini", "Yeşil Çay", "Niasinamid"].map((ing) => (
-                    <span key={ing} className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 border border-emerald-100">
+                    <span key={ing} className="rounded-full px-3 py-1.5 text-xs font-medium border" style={{ backgroundColor: brandColor + "10", borderColor: brandColor + "20", color: brandColor }}>
                       {ing}
                     </span>
                   ))}
@@ -452,25 +468,25 @@ export default function Home() {
       </section>
 
       {/* ── Psychological Impact & Social Proof - Prompt 3 ────────────────── */}
-      <section className="py-24" style={{ backgroundColor: brandColor + "0D" }}>
+      <section className="py-24" style={{ backgroundColor: brandColor + "08" }}>
         <div className="mx-auto max-w-7xl px-6">
           {/* Psychological text */}
           <div className="text-center mb-12">
-            <p className="text-sm font-semibold text-emerald-600 mb-2 tracking-wider">PSİKOLOJİK ETKİ</p>
+            <p className="text-sm font-semibold mb-2 tracking-wider" style={{ color: brandColor }}>PSİKOLOJİK ETKİ</p>
             <h2 className="text-3xl font-black tracking-tight text-slate-900 md:text-4xl mb-3">
               Cilt Pürüzleri Sosyal Kaygıyı Artırıyor
             </h2>
-            <p className="text-xl font-bold text-emerald-700">
+            <p className="text-xl font-bold" style={{ color: brandColor }}>
               Pürüzsüz Cilt ile Güveninizi Geri Kazanın
             </p>
-            <div className="inline-block mt-4 rounded-full bg-emerald-200 px-4 py-1.5">
-              <span className="text-sm font-bold text-emerald-800">1 Ayda Cilt Değişimi İmkanı</span>
+            <div className="inline-block mt-4 rounded-full px-4 py-1.5" style={{ backgroundColor: brandColor + "20" }}>
+              <span className="text-sm font-bold" style={{ color: brandColor }}>1 Ayda Cilt Değişimi İmkanı</span>
             </div>
           </div>
 
-          {/* Reviews section */}
+          {/* Reviews section - extended */}
           <div className="mb-16">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <div className="flex items-center gap-0.5">
@@ -478,39 +494,41 @@ export default function Home() {
                       <Star key={i} className="h-5 w-5 fill-amber-400 text-amber-400" />
                     ))}
                   </div>
-                  <span className="text-lg font-bold text-slate-900">4.9</span>
+                  <span className="text-lg font-bold text-slate-900">{avgRating}</span>
                 </div>
-                <p className="text-sm text-slate-500"><span className="font-bold text-slate-900">8,000+</span> müşteri yorumu</p>
+                <p className="text-sm text-slate-500"><span className="font-bold text-slate-900">12,000+</span> müşteri yorumu</p>
               </div>
-              <div className="flex items-center gap-1 text-emerald-600">
+              <div className="flex items-center gap-1" style={{ color: brandColor }}>
                 <Users className="h-4 w-4" />
-                <span className="text-xs font-semibold">Mutlu Müşteriler</span>
+                <span className="text-xs font-semibold">98% Mutlu Müşteri</span>
               </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {reviews.map((review) => (
-                <div key={review.id} className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-xs">
+                <div key={review.id} className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm" style={{ backgroundColor: brandColor }}>
                       {review.name.charAt(0)}
                     </div>
                     <div>
                       <p className="text-sm font-bold text-slate-900">{review.name}</p>
-                      <div className="flex items-center gap-1">
-                        <div className="flex items-center gap-0.5">
-                          {Array.from({ length: review.rating }).map((_, i) => (
-                            <Star key={i} className="h-3 w-3 fill-amber-400 text-amber-400" />
-                          ))}
-                        </div>
+                      <div className="flex items-center gap-2">
+                        <StarRating rating={review.rating} />
                         <span className="text-[10px] text-slate-400">{review.days} gün önce</span>
                       </div>
                     </div>
                   </div>
-                  <p className="text-sm text-slate-600">"{review.text}"</p>
-                  <div className="mt-3 flex items-center gap-1 text-emerald-600">
-                    <ThumbsUp className="h-3 w-3" />
-                    <span className="text-[10px] font-semibold">Faydalı</span>
+                  <p className="text-sm text-slate-600 leading-relaxed">"{review.text}"</p>
+                  <div className="mt-3 flex items-center justify-between">
+                    <div className="flex items-center gap-1" style={{ color: brandColor }}>
+                      <ThumbsUp className="h-3 w-3" />
+                      <span className="text-[10px] font-semibold">Faydalı</span>
+                    </div>
+                    {review.verified && (
+                      <span className="text-[10px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">✓ Doğrulandı</span>
+                    )}
+                    <span className="text-[10px] text-slate-400">{review.location}</span>
                   </div>
                 </div>
               ))}
@@ -527,14 +545,16 @@ export default function Home() {
                   <div 
                     key={product.id}
                     className={cn(
-                      "group relative rounded-2xl p-6 text-center border transition-all duration-300",
+                      "group relative rounded-2xl p-6 text-center border transition-all duration-300 cursor-pointer",
                       isSelected 
-                        ? "bg-gradient-to-br from-emerald-50 to-white border-emerald-200 shadow-lg scale-[1.02]" 
+                        ? "shadow-lg scale-[1.02]" 
                         : "bg-white border-slate-100 shadow-sm hover:shadow-lg"
                     )}
+                    style={isSelected ? { borderColor: brandColor, backgroundColor: brandColor + "04" } : {}}
+                    onClick={() => setSelectedProduct(product)}
                   >
                     {idx === 1 && (
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-emerald-600 px-3 py-0.5 text-[10px] font-bold text-white whitespace-nowrap">
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full px-3 py-0.5 text-[10px] font-bold text-white whitespace-nowrap" style={{ backgroundColor: brandColor }}>
                         En Çok Tercih Edilen
                       </div>
                     )}
@@ -542,12 +562,12 @@ export default function Home() {
                       {product.image ? (
                         <img src={product.image} alt={product.name} className="h-full w-full object-cover transition-transform group-hover:scale-110" />
                       ) : (
-                        <Package className={cn("h-10 w-10", isSelected ? "text-emerald-700" : "text-emerald-600")} />
+                        <Package className={cn("h-10 w-10", isSelected ? "text-emerald-700" : "text-slate-400")} style={isSelected ? { color: brandColor } : {}} />
                       )}
                     </div>
                     <h4 className="text-xl font-bold text-slate-900">{product.name}</h4>
                     <div className="my-4">
-                      <span className={cn("text-3xl font-black", isSelected ? "text-emerald-700" : "text-slate-900")}>
+                      <span className={cn("text-3xl font-black", isSelected ? "text-emerald-700" : "text-slate-900")} style={isSelected ? { color: brandColor } : {}}>
                         {formatCurrency(product.price)}
                       </span>
                       {product.oldPrice && (
@@ -555,18 +575,21 @@ export default function Home() {
                           <span className="text-sm text-slate-400 line-through ml-2">
                             {formatCurrency(product.oldPrice)}
                           </span>
-                          <span className="ml-2 inline-block rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700">
+                          <span className="ml-2 inline-block rounded-full px-1.5 py-0.5 text-[10px] font-bold text-white" style={{ backgroundColor: brandColor }}>
                             - {formatCurrency(product.oldPrice - product.price)}
                           </span>
                         </>
                       )}
                     </div>
                     <button
-                      onClick={() => scrollToOrder(product)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        scrollToOrder(product);
+                      }}
                       className="w-full rounded-xl py-2.5 text-sm font-bold text-white transition-all hover:opacity-90 active:scale-95"
                       style={{ backgroundColor: brandColor }}
                     >
-                      {isSelected ? "Paket Seçildi" : "Bu Paketi Seç"}
+                      {isSelected ? "✓ Seçildi" : "Bu Paketi Seç"}
                     </button>
                     <p className="text-xs text-slate-400 mt-3">Kargo ücreti dahil</p>
                   </div>
@@ -581,14 +604,14 @@ export default function Home() {
       <section
         id="order"
         ref={orderSectionRef}
-        className="py-24 md:py-36 border-t border-black/5"
+        className="py-24 md:py-36"
         style={{ backgroundColor: "var(--bg)" }}
       >
         <div className="mx-auto max-w-7xl px-6">
           <div className="grid gap-16 lg:grid-cols-2 lg:items-start lg:gap-24">
             {/* Left – info */}
             <div className="lg:pt-4">
-              <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-emerald-600">
+              <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest" style={{ color: brandColor }}>
                 Sipariş
               </p>
               <h2 className="mb-6 text-4xl font-black tracking-tight text-slate-900 md:text-5xl">
@@ -604,8 +627,8 @@ export default function Home() {
                   { icon: Award, title: "Dermatolojik Onay", desc: "Uzmanlar tarafından test edilmiştir." },
                   { icon: Truck, title: "Hızlı Teslimat", desc: "14:00'a kadar siparişlerde aynı gün kargo." },
                 ].map(({ icon: Icon, title, desc }) => (
-                  <div key={title} className="flex items-start gap-4 rounded-2xl border border-slate-100 bg-slate-50 p-5">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+                  <div key={title} className="flex items-start gap-4 rounded-2xl border border-slate-100 p-5" style={{ backgroundColor: brandColor + "04" }}>
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white" style={{ backgroundColor: brandColor }}>
                       <Icon className="h-5 w-5" />
                     </div>
                     <div>
@@ -631,8 +654,8 @@ export default function Home() {
                     exit={{ opacity: 0 }}
                     className="flex flex-col items-center py-16 text-center"
                   >
-                    <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
-                      <CheckCircle2 className="h-10 w-10" />
+                    <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full" style={{ backgroundColor: brandColor + "20" }}>
+                      <CheckCircle2 className="h-10 w-10" style={{ color: brandColor }} />
                     </div>
                     <h3 className="mb-3 text-2xl font-black tracking-tight text-slate-900">
                       Siparişiniz Alındı!
@@ -644,16 +667,16 @@ export default function Home() {
                 ) : (
                   <motion.form key="form" onSubmit={handleSubmit} className="space-y-6">
                     {selectedProduct ? (
-                      <div className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-slate-50 p-4">
-                        <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-emerald-100 flex items-center justify-center">
+                      <div className="flex items-center gap-4 rounded-2xl border border-slate-100 p-4" style={{ backgroundColor: brandColor + "04" }}>
+                        <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl flex items-center justify-center" style={{ backgroundColor: brandColor + "15" }}>
                           {selectedProduct.image ? (
                             <img src={selectedProduct.image} alt={selectedProduct.name} className="h-full w-full object-cover" />
                           ) : (
-                            <Package className="h-8 w-8 text-emerald-700" />
+                            <Package className="h-8 w-8" style={{ color: brandColor }} />
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-[10px] font-semibold uppercase tracking-wider text-emerald-600">
+                          <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: brandColor }}>
                             Seçilen Paket
                           </p>
                           <p className="truncate font-bold text-slate-900">{selectedProduct.name}</p>
@@ -757,7 +780,7 @@ export default function Home() {
       </section>
 
       {/* ── Footer ───────────────────────────────────────────────────────── */}
-      <footer className="border-t border-slate-100 bg-slate-50 pb-10 pt-16">
+      <footer className="border-t border-slate-100 py-10" style={{ backgroundColor: brandColor + "04" }}>
         <div className="mx-auto max-w-7xl px-6">
           <div className="mb-10 flex flex-col items-start gap-8 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-3">
@@ -765,7 +788,7 @@ export default function Home() {
                 <img src={settings.logo || undefined} alt="" className="h-8 w-auto" />
               ) : (
                 <>
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg text-white text-xs font-black bg-emerald-600">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg text-white" style={{ backgroundColor: brandColor }}>
                     <Leaf className="h-4 w-4" />
                   </div>
                   <span className="font-black tracking-tight text-slate-900">
@@ -779,7 +802,10 @@ export default function Home() {
               {[Instagram, MessageCircle, Mail].map((Icon, i) => (
                 <button
                   key={i}
-                  className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-400 transition-all hover:border-emerald-600 hover:bg-emerald-600 hover:text-white"
+                  className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-400 transition-all hover:text-white"
+                  style={{ backgroundColor: "transparent", borderColor: brandColor + "30" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = brandColor; e.currentTarget.style.color = "white"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "#9CA3AF"; }}
                 >
                   <Icon className="h-4 w-4" />
                 </button>
