@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "motion/react";
 import {
   ShoppingCart, Phone, Mail, Instagram, MessageCircle,
   ChevronRight, Truck, ShieldCheck, Star, ArrowRight,
-  CheckCircle2, Zap, Package, Award, ChevronDown
+  CheckCircle2, Zap, Package, Award, ChevronDown, Droplet, Sun, Leaf, Sparkles, Users, ThumbsUp, Clock
 } from "lucide-react";
 import { cn, formatCurrency } from "../lib/utils";
 
@@ -25,8 +25,8 @@ function Badge({ children, style }: { children: React.ReactNode; style?: React.C
 
 function FeaturePill({ icon: Icon, label }: { icon: React.ElementType; label: string }) {
   return (
-    <div className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold text-white/80 backdrop-blur-sm border border-white/10">
-      <Icon className="h-3.5 w-3.5 text-white/60" />
+    <div className="flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-xs font-semibold text-emerald-700 backdrop-blur-sm border border-emerald-100">
+      <Icon className="h-3.5 w-3.5 text-emerald-600" />
       {label}
     </div>
   );
@@ -38,12 +38,12 @@ function InputField({
 }: { label: string } & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <div className="group space-y-1.5">
-      <label className="block text-[11px] font-semibold uppercase tracking-widest text-slate-400 transition-colors group-focus-within:text-slate-700">
+      <label className="block text-[11px] font-semibold uppercase tracking-widest text-slate-400 transition-colors group-focus-within:text-emerald-600">
         {label}
       </label>
       <input
         {...props}
-        className="w-full rounded-2xl border border-slate-200 bg-slate-50/80 px-5 py-3.5 text-sm font-medium text-slate-900 placeholder:text-slate-300 transition-all focus:border-slate-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-slate-100"
+        className="w-full rounded-2xl border border-slate-200 bg-slate-50/80 px-5 py-3.5 text-sm font-medium text-slate-900 placeholder:text-slate-300 transition-all focus:border-emerald-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-emerald-50"
       />
     </div>
   );
@@ -55,12 +55,12 @@ function TextAreaField({
 }: { label: string } & React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return (
     <div className="group space-y-1.5">
-      <label className="block text-[11px] font-semibold uppercase tracking-widest text-slate-400 transition-colors group-focus-within:text-slate-700">
+      <label className="block text-[11px] font-semibold uppercase tracking-widest text-slate-400 transition-colors group-focus-within:text-emerald-600">
         {label}
       </label>
       <textarea
         {...props}
-        className="w-full rounded-2xl border border-slate-200 bg-slate-50/80 px-5 py-3.5 text-sm font-medium text-slate-900 placeholder:text-slate-300 transition-all focus:border-slate-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-slate-100 resize-none"
+        className="w-full rounded-2xl border border-slate-200 bg-slate-50/80 px-5 py-3.5 text-sm font-medium text-slate-900 placeholder:text-slate-300 transition-all focus:border-emerald-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-emerald-50 resize-none"
       />
     </div>
   );
@@ -73,6 +73,7 @@ export default function Home() {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const orderSectionRef = useRef<HTMLDivElement>(null);
+  const orderFormRef = useRef<HTMLDivElement>(null);
 
   const [formData, setFormData] = useState({
     customerName: "",
@@ -85,6 +86,14 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
+  // Mock reviews data
+  const reviews = [
+    { id: 1, name: "Ayşe Yılmaz", rating: 5, text: "Cildim gerçekten parladı! 2 hafta içinde farkı gördüm.", days: 3 },
+    { id: 2, name: "Mehmet Demir", rating: 5, text: "Sivilcelerim söndü, cildim pürüzsüzleşti. Kesinlikle tavsiye ederim.", days: 5 },
+    { id: 3, name: "Zeynep Kaya", rating: 4, text: "Gözeneklerim küçüldü, cildim çok daha canlı görünüyor.", days: 7 },
+    { id: 4, name: "Can Öztürk", rating: 5, text: "Hyaluronik asit harika! Cildim nem dengesini buldu.", days: 2 },
+  ];
+
   // ─── Data fetching ─────────────────────────────────────────────────────────
   useEffect(() => {
     const productsRef = ref(db, "products");
@@ -95,7 +104,6 @@ export default function Home() {
       if (data) {
         const loaded = Object.keys(data).map((key) => ({ id: key, ...data[key] }));
         setProducts(loaded);
-        // Only auto-select if user hasn't already chosen
         setSelectedProduct((prev) => prev ?? loaded[0] ?? null);
       }
     });
@@ -113,7 +121,7 @@ export default function Home() {
   // ─── Handlers ─────────────────────────────────────────────────────────────
   const scrollToOrder = (product: Product) => {
     setSelectedProduct(product);
-    setTimeout(() => orderSectionRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
+    setTimeout(() => orderFormRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 50);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -145,13 +153,14 @@ export default function Home() {
     }
   };
 
-  const brand = settings?.brandColor || "#111827";
+  const brandColor = settings?.brandColor || "#059669";
+  const bgColor = settings?.bgColor || "#ffffff";
 
   // ─── Render ────────────────────────────────────────────────────────────────
   return (
     <div
-      className="min-h-screen bg-white font-sans text-slate-900 antialiased selection:bg-slate-900 selection:text-white"
-      style={{ "--brand": brand } as React.CSSProperties}
+      className="min-h-screen font-sans text-slate-900 antialiased selection:bg-emerald-900 selection:text-white"
+      style={{ "--brand": brandColor, backgroundColor: bgColor } as React.CSSProperties}
     >
       {/* ── Announcement bar ─────────────────────────────────────────────── */}
       <AnimatePresence>
@@ -160,7 +169,7 @@ export default function Home() {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden bg-slate-900"
+            className="overflow-hidden bg-emerald-900"
           >
             <div className="relative overflow-hidden py-2.5">
               <motion.div
@@ -186,7 +195,6 @@ export default function Home() {
       {/* ── Header ───────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          {/* Logo / Brand */}
           <div className="flex items-center gap-3">
             {settings?.logo ? (
               <img src={settings.logo || undefined} alt={settings.title || "Logo"} className="h-9 w-auto object-contain" />
@@ -194,34 +202,33 @@ export default function Home() {
               <>
                 <div
                   className="flex h-9 w-9 items-center justify-center rounded-xl text-white"
-                  style={{ backgroundColor: brand }}
+                  style={{ backgroundColor: brandColor }}
                 >
-                  <span className="text-sm font-black">{settings?.title?.[0] || "T"}</span>
+                  <Leaf className="h-5 w-5" />
                 </div>
-                <span className="text-base font-black tracking-tight">
-                  {settings?.title || "Termo Maske"}
+                <span className="text-base font-black tracking-tight text-emerald-800">
+                  {settings?.title || "GlowMask"}
                 </span>
               </>
             )}
           </div>
 
-          {/* Actions */}
           <div className="flex items-center gap-3">
             {settings?.whatsapp && (
               <a
                 href={`https://wa.me/${settings.whatsapp}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition-all hover:border-slate-900 hover:bg-slate-900 hover:text-white"
+                className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition-all hover:border-emerald-600 hover:bg-emerald-600 hover:text-white"
               >
                 <MessageCircle className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">WhatsApp</span>
               </a>
             )}
             <button
-              onClick={() => orderSectionRef.current?.scrollIntoView({ behavior: "smooth" })}
+              onClick={() => orderFormRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })}
               className="flex items-center gap-2 rounded-full px-5 py-2 text-xs font-semibold text-white transition-all hover:opacity-90 active:scale-95"
-              style={{ backgroundColor: brand }}
+              style={{ backgroundColor: brandColor }}
             >
               <ShoppingCart className="h-3.5 w-3.5" />
               Sipariş Ver
@@ -230,139 +237,127 @@ export default function Home() {
         </div>
       </header>
 
-      {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-white pt-16 pb-24 md:pt-28 md:pb-36">
-        {/* Subtle background grid */}
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: "linear-gradient(#000 1px,transparent 1px),linear-gradient(90deg,#000 1px,transparent 1px)",
-            backgroundSize: "40px 40px",
-          }}
-        />
-
+      {/* ── Hero Section - Prompt 1 ──────────────────────────────────────── */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-white pt-16 pb-24 md:pt-28 md:pb-36">
+        <div className="absolute top-0 right-0 -translate-y-1/3 translate-x-1/3 w-96 h-96 bg-emerald-200 rounded-full opacity-20 blur-3xl" />
+        
         <div className="relative mx-auto max-w-7xl px-6">
+          {/* Green title */}
+          <div className="text-center mb-8">
+            <Badge style={{ color: brandColor, borderColor: brandColor + "33", backgroundColor: brandColor + "0D" }}>
+              <Sparkles className="h-3 w-3" />
+              Cilt Yenilemenin Yeni Formülü
+            </Badge>
+          </div>
+
           <div className="grid gap-16 lg:grid-cols-2 lg:items-center lg:gap-24">
-            {/* Left – copy */}
+            {/* Left – copy with bullet points */}
             <motion.div
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             >
-              <div className="mb-6">
-                <Badge style={{ color: brand, borderColor: brand + "33", backgroundColor: brand + "0D" }}>
-                  <Zap className="h-3 w-3" />
-                  Nano Kumaş Teknolojisi
-                </Badge>
-              </div>
-
-              <h1 className="mb-6 text-5xl font-black leading-[1.05] tracking-tight text-slate-900 md:text-6xl lg:text-7xl">
-                {settings?.bannerTitle || (
-                  <>
-                    Geleceğin<br />
-                    <span style={{ color: brand }}>Konforu</span><br />
-                    Bugünden
-                  </>
-                )}
+              <h1 className="mb-6 text-5xl font-black leading-[1.1] tracking-tight text-slate-900 md:text-6xl lg:text-7xl">
+                Yeni <span style={{ color: brandColor }}>GlowMask</span><br />
+                Maske
               </h1>
 
-              <p className="mb-10 max-w-md text-base leading-relaxed text-slate-500 md:text-lg">
-                {settings?.bannerSubtitle ||
-                  "Isı dengeleyici nano kumaş teknolojisi ile üretilen Termo Maske, her ortamda ideal sıcaklığı korumanız için tasarlandı."}
-              </p>
+              {/* Three bullet points with icons */}
+              <div className="space-y-5 mb-10">
+                <div className="flex gap-4 items-start">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/><circle cx="12" cy="12" r="3"/></svg>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-900">Gözenekleri Derinlemesine Temizler</h3>
+                    <p className="text-sm text-slate-500">Yağ ve kiri arındırır, gözenek görünümünü azaltır.</p>
+                  </div>
+                </div>
+                <div className="flex gap-4 items-start">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+                    <Droplet className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-900">Derin Nemlendirme</h3>
+                    <p className="text-sm text-slate-500">Hyaluronik asit ile cildi nemlendirir ve besler.</p>
+                  </div>
+                </div>
+                <div className="flex gap-4 items-start">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+                    <Sun className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-900">Cildi Aydınlatır</h3>
+                    <p className="text-sm text-slate-500">C vitamini ile renk tonunu eşitler ve parlaklık verir.</p>
+                  </div>
+                </div>
+              </div>
 
               {/* Trust signals */}
-              <div className="mb-10 flex flex-wrap items-center gap-3">
+              <div className="mb-8 flex flex-wrap items-center gap-3">
                 <FeaturePill icon={Truck} label="Aynı Gün Kargo" />
                 <FeaturePill icon={ShieldCheck} label="Kapıda Ödeme" />
                 <FeaturePill icon={Package} label="30 Gün İade" />
               </div>
 
+              {/* CTA Button with rating and discount */}
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                 <button
-                  onClick={() => orderSectionRef.current?.scrollIntoView({ behavior: "smooth" })}
+                  onClick={() => orderFormRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })}
                   className="group flex items-center justify-center gap-3 rounded-2xl px-8 py-4 text-sm font-bold text-white transition-all hover:opacity-90 active:scale-95"
-                  style={{ backgroundColor: brand }}
+                  style={{ backgroundColor: brandColor }}
                 >
-                  Şimdi Sipariş Ver
+                  HEMEN SİPARİŞ VER
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </button>
-                <button
-                  onClick={() => document.getElementById("products")?.scrollIntoView({ behavior: "smooth" })}
-                  className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-8 py-4 text-sm font-semibold text-slate-700 transition-all hover:border-slate-400"
-                >
-                  Paketleri İncele
-                  <ChevronDown className="h-4 w-4" />
-                </button>
-              </div>
-
-              {/* Social proof */}
-              <div className="mt-10 flex items-center gap-4 border-t border-slate-100 pt-8">
-                <div className="flex -space-x-2">
-                  {[1, 2, 3, 4].map((i) => (
-                    <img
-                      key={i}
-                      src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i + 20}`}
-                      alt=""
-                      className="h-8 w-8 rounded-full border-2 border-white bg-slate-100"
-                    />
-                  ))}
-                </div>
-                <div>
-                  <div className="flex items-center gap-0.5 mb-0.5">
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-0.5">
                     {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={i} className="h-3 w-3 fill-amber-400 text-amber-400" />
+                      <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
                     ))}
                   </div>
-                  <p className="text-xs font-semibold text-slate-500">
-                    <span className="text-slate-900">4.9/5</span> · 2.400+ müşteri
-                  </p>
+                  <span className="text-sm font-semibold text-slate-700">4.9/5</span>
+                  <span className="text-xs text-slate-400">(2.400+ yorum)</span>
+                  <span className="ml-2 inline-block rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-700">%25 İNDİRİM</span>
                 </div>
               </div>
             </motion.div>
 
-            {/* Right – product image */}
+            {/* Right – smiling model with mask */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.9, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
               className="relative"
             >
-              <div className="relative overflow-hidden rounded-3xl bg-slate-50 aspect-[4/5] shadow-2xl shadow-slate-200">
+              <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-100 to-slate-100 aspect-[4/5] shadow-2xl shadow-slate-200">
                 {settings?.heroImage ? (
-                  <img src={settings.heroImage || undefined} alt="Ürün" className="h-full w-full object-cover" />
+                  <img src={settings.heroImage || undefined} alt="Gülümseyen model" className="h-full w-full object-cover" />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center">
-                    <ShoppingCart className="h-24 w-24 text-slate-200" />
+                  <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-emerald-200 to-emerald-100">
+                    <div className="rounded-full bg-white/30 p-6 mb-4">
+                      <Leaf className="h-16 w-16 text-emerald-700" />
+                    </div>
+                    <p className="text-emerald-800 font-semibold">Maske Uygulaması</p>
                   </div>
                 )}
               </div>
-
-              {/* Floating stat card */}
+              {/* Product jar */}
               <motion.div
-                initial={{ opacity: 0, x: -16, y: 8 }}
+                initial={{ opacity: 0, x: 16, y: 8 }}
                 animate={{ opacity: 1, x: 0, y: 0 }}
                 transition={{ delay: 0.5, duration: 0.6 }}
-                className="absolute -bottom-6 -left-6 rounded-2xl border border-slate-100 bg-white p-5 shadow-xl"
+                className="absolute -bottom-6 -right-6 rounded-2xl border border-slate-100 bg-white p-4 shadow-xl"
               >
-                <p className="text-2xl font-black text-slate-900">
-                  <span style={{ color: brand }}>99%</span>
-                </p>
-                <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                  Termal Verimlilik
-                </p>
-              </motion.div>
-
-              {/* Floating badge top-right */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.65, duration: 0.5 }}
-                className="absolute -top-4 -right-4 rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-xl"
-              >
-                <div className="flex items-center gap-2">
-                  <Award className="h-4 w-4" style={{ color: brand }} />
-                  <span className="text-[11px] font-bold text-slate-700">AB Sertifikalı</span>
+                <div className="flex items-center gap-3">
+                  <div className="h-14 w-14 rounded-xl bg-emerald-100 flex items-center justify-center">
+                    <Package className="h-7 w-7 text-emerald-700" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-400">Ambalajlı</p>
+                    <p className="font-bold text-slate-900">GlowMask Kavanoz</p>
+                    <p className="text-xs text-emerald-600 font-semibold">50 ml</p>
+                  </div>
                 </div>
               </motion.div>
             </motion.div>
@@ -370,225 +365,200 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Trust bar ────────────────────────────────────────────────────── */}
-      <div className="border-y border-slate-100 bg-slate-50">
+      {/* ── Before-After Section - Prompt 2 ───────────────────────────────── */}
+      <section className="py-24 bg-white">
         <div className="mx-auto max-w-7xl px-6">
-          <div className="grid grid-cols-2 divide-x divide-slate-100 md:grid-cols-4">
-            {[
-              { icon: ShieldCheck, label: "Kapıda Ödeme", sub: "Ürünü kontrol et, öde" },
-              { icon: Truck, label: "Aynı Gün Kargo", sub: "14:00'a kadar siparişlerde" },
-              { icon: Package, label: "30 Gün İade", sub: "Koşulsuz iade garantisi" },
-              { icon: Award, label: "AB Sertifikası", sub: "Kalite belgeli ürün" },
-            ].map(({ icon: Icon, label, sub }) => (
-              <div key={label} className="flex items-center gap-3 px-6 py-5">
-                <div
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
-                  style={{ backgroundColor: brand + "15", color: brand }}
-                >
-                  <Icon className="h-4 w-4" />
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-black tracking-tight text-emerald-700 md:text-4xl">
+              Zararsız ve Etkili Olduğu Kanıtlandı
+            </h2>
+          </div>
+
+          <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
+            {/* Before-After comparison */}
+            <div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="rounded-2xl overflow-hidden bg-slate-100">
+                  <div className="aspect-[3/4] bg-gradient-to-br from-rose-100 to-slate-200 flex items-center justify-center p-8">
+                    <div className="text-center">
+                      <div className="w-24 h-24 mx-auto rounded-full bg-rose-200/50 mb-4" />
+                      <p className="text-xs font-semibold text-rose-600">Sivilce & Pürüzlü Cilt</p>
+                    </div>
+                  </div>
+                  <div className="p-3 text-center bg-rose-50">
+                    <span className="text-xs font-bold text-rose-600">ÖNCE</span>
+                  </div>
+                </div>
+                <div className="rounded-2xl overflow-hidden bg-slate-100">
+                  <div className="aspect-[3/4] bg-gradient-to-br from-emerald-100 to-slate-100 flex items-center justify-center p-8">
+                    <div className="text-center">
+                      <div className="w-24 h-24 mx-auto rounded-full bg-emerald-200/50 mb-4 flex items-center justify-center">
+                        <Sparkles className="h-8 w-8 text-emerald-600" />
+                      </div>
+                      <p className="text-xs font-semibold text-emerald-600">Pürüzsüz & Temiz Cilt</p>
+                    </div>
+                  </div>
+                  <div className="p-3 text-center bg-emerald-50">
+                    <span className="text-xs font-bold text-emerald-600">SONRA</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Scientific proof */}
+            <div>
+              <p className="text-xl font-bold text-slate-900 mb-4">
+                Yapılan çalışmalar, <span style={{ color: brandColor }}>GlowMask Maske</span>'nin cildi tahriş etmeden etkili bir şekilde yenilediğini ve pürüzsüzleştirdiğini doğrulamaktadır.
+              </p>
+              
+              {/* Microscope image placeholder */}
+              <div className="flex items-center gap-6 mb-6 bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                <div className="w-20 h-20 rounded-xl bg-emerald-100 flex items-center justify-center">
+                  <svg className="h-10 w-10 text-emerald-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <circle cx="12" cy="12" r="8" />
+                    <path d="M12 3v2M12 19v2M3 12h2M19 12h2M6.5 6.5l1.5 1.5M16 16l1.5 1.5M6.5 17.5L8 16M16 8l1.5-1.5" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-slate-900">{label}</p>
-                  <p className="text-xs text-slate-400">{sub}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ── Features bento ───────────────────────────────────────────────── */}
-      <section className="py-24 md:py-36">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="mb-16 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-slate-400">
-                {settings?.featuresSubtitle || "Teknoloji"}
-              </p>
-              <h2 className="text-4xl font-black tracking-tight text-slate-900 md:text-5xl">
-                {settings?.featuresTitle || "Detaylarda Gizli\nMükemmellik"}
-              </h2>
-            </div>
-            <p className="max-w-xs text-sm text-slate-500 md:text-right">
-              Her bileşen, maksimum konfor ve dayanıklılık için titizlikle seçilmiştir.
-            </p>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-12">
-            {/* Main feature */}
-            <div className="group relative col-span-12 overflow-hidden rounded-3xl border border-slate-100 bg-slate-50 md:col-span-7">
-              <div className="p-10">
-                <div
-                  className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl"
-                  style={{ backgroundColor: brand, color: "#fff" }}
-                >
-                  <ShieldCheck className="h-6 w-6" />
-                </div>
-                <h3 className="mb-3 text-2xl font-black tracking-tight text-slate-900">
-                  Akıllı Isı Dengeleme
-                </h3>
-                <p className="max-w-sm text-sm leading-relaxed text-slate-500">
-                  Vücut ısınızı hapseden veya tahliye eden mikro gözenekli doku yapısı ile
-                  her mevsim ideal konfor.
-                </p>
-              </div>
-              <div className="h-56 overflow-hidden">
-                <img
-                  src={settings?.heroImage || products[0]?.image || undefined}
-                  alt=""
-                  className="h-full w-full object-cover grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-105"
-                />
-              </div>
-            </div>
-
-            {/* Side features */}
-            <div className="col-span-12 flex flex-col gap-4 md:col-span-5">
-              <div className="flex-1 rounded-3xl bg-slate-900 p-8 text-white">
-                <h3 className="mb-6 text-xl font-black tracking-tight">
-                  Hava Transfer Teknolojisi
-                </h3>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between text-xs font-semibold text-slate-400">
-                    <span>Geçirgenlik</span>
-                    <span className="text-white">85%</span>
-                  </div>
-                  <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      whileInView={{ width: "85%" }}
-                      transition={{ duration: 1.2, ease: "easeOut" }}
-                      viewport={{ once: true }}
-                      className="h-full rounded-full"
-                      style={{ backgroundColor: brand }}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between text-xs font-semibold text-slate-400">
-                    <span>Nem Kontrolü</span>
-                    <span className="text-white">92%</span>
-                  </div>
-                  <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      whileInView={{ width: "92%" }}
-                      transition={{ duration: 1.4, delay: 0.1, ease: "easeOut" }}
-                      viewport={{ once: true }}
-                      className="h-full rounded-full bg-emerald-400"
-                    />
-                  </div>
+                  <p className="text-sm font-semibold text-slate-900">Mikroskop altında pürüzsüz cilt hücresi</p>
+                  <p className="text-xs text-slate-500">Dermatolojik olarak test edilmiştir</p>
                 </div>
               </div>
 
-              <div
-                className="flex-1 rounded-3xl p-8 text-white"
-                style={{ backgroundColor: brand }}
-              >
-                <Truck className="mb-6 h-8 w-8 text-white/80" />
-                <h3 className="text-xl font-black tracking-tight">
-                  Aynı Gün Express Kargo
-                </h3>
-                <p className="mt-2 text-sm text-white/60">
-                  Saat 14:00'a kadar verilen siparişler aynı gün kargoya verilir.
-                </p>
+              {/* Ingredient list */}
+              <div className="mb-4">
+                <p className="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2"><Leaf className="h-4 w-4 text-emerald-600" /> Doğal Formül</p>
+                <div className="flex flex-wrap gap-2">
+                  {["Kil", "Aloe Vera", "Hyaluronik Asit", "C Vitamini", "Yeşil Çay", "Niasinamid"].map((ing) => (
+                    <span key={ing} className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 border border-emerald-100">
+                      {ing}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── Products ─────────────────────────────────────────────────────── */}
-      <section id="products" className="border-t border-slate-100 bg-slate-50 py-24 md:py-36">
+      {/* ── Psychological Impact & Social Proof - Prompt 3 ────────────────── */}
+      <section className="py-24 bg-emerald-50">
         <div className="mx-auto max-w-7xl px-6">
-          <div className="mb-16 text-center">
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-slate-400">
-              {settings?.productsSubtitle || "Paket Seçimi"}
-            </p>
-            <h2 className="text-4xl font-black tracking-tight text-slate-900 md:text-5xl">
-              {settings?.productsTitle || "İhtiyacınıza Özel Setler"}
+          {/* Psychological text */}
+          <div className="text-center mb-12">
+            <p className="text-sm font-semibold text-emerald-600 mb-2 tracking-wider">PSİKOLOJİK ETKİ</p>
+            <h2 className="text-3xl font-black tracking-tight text-slate-900 md:text-4xl mb-3">
+              Cilt Pürüzleri Sosyal Kaygıyı Artırıyor
             </h2>
+            <p className="text-xl font-bold text-emerald-700">
+              Pürüzsüz Cilt ile Güveninizi Geri Kazanın
+            </p>
+            <div className="inline-block mt-4 rounded-full bg-emerald-200 px-4 py-1.5">
+              <span className="text-sm font-bold text-emerald-800">1 Ayda Cilt Değişimi İmkanı</span>
+            </div>
           </div>
 
-          {products.length === 0 ? (
-            <div className="flex h-48 items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white">
-              <p className="text-sm text-slate-400">Ürünler yükleniyor…</p>
+          {/* Reviews section */}
+          <div className="mb-16">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center gap-0.5">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star key={i} className="h-5 w-5 fill-amber-400 text-amber-400" />
+                    ))}
+                  </div>
+                  <span className="text-lg font-bold text-slate-900">4.9</span>
+                </div>
+                <p className="text-sm text-slate-500"><span className="font-bold text-slate-900">8,000+</span> müşteri yorumu</p>
+              </div>
+              <div className="flex items-center gap-1 text-emerald-600">
+                <Users className="h-4 w-4" />
+                <span className="text-xs font-semibold">Mutlu Müşteriler</span>
+              </div>
             </div>
-          ) : (
+
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              {reviews.map((review) => (
+                <div key={review.id} className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-xs">
+                      {review.name.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-slate-900">{review.name}</p>
+                      <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-0.5">
+                          {Array.from({ length: review.rating }).map((_, i) => (
+                            <Star key={i} className="h-3 w-3 fill-amber-400 text-amber-400" />
+                          ))}
+                        </div>
+                        <span className="text-[10px] text-slate-400">{review.days} gün önce</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-sm text-slate-600">"{review.text}"</p>
+                  <div className="mt-3 flex items-center gap-1 text-emerald-600">
+                    <ThumbsUp className="h-3 w-3" />
+                    <span className="text-[10px] font-semibold">Faydalı</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Price packages */}
+          <div>
+            <h3 className="text-2xl font-black text-center text-slate-900 mb-8">{settings?.productsTitle || "Paketleri İncele"}</h3>
             <div className="grid gap-6 md:grid-cols-3">
               {products.map((product, idx) => {
                 const isSelected = selectedProduct?.id === product.id;
                 return (
-                  <motion.div
+                  <div 
                     key={product.id}
-                    initial={{ opacity: 0, y: 24 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: idx * 0.1, duration: 0.6 }}
-                    onClick={() => setSelectedProduct(product)}
                     className={cn(
-                      "group relative cursor-pointer overflow-hidden rounded-3xl border-2 bg-white transition-all duration-300",
-                      isSelected
-                        ? "shadow-xl shadow-slate-200 scale-[1.02]"
-                        : "border-transparent hover:border-slate-200 hover:shadow-md"
+                      "group relative rounded-2xl p-6 text-center border transition-all duration-300",
+                      isSelected 
+                        ? "bg-gradient-to-br from-emerald-50 to-white border-emerald-200 shadow-lg scale-[1.02]" 
+                        : "bg-white border-slate-100 shadow-sm hover:shadow-lg"
                     )}
-                    style={isSelected ? { borderColor: brand } : {}}
                   >
-                    {/* Most popular badge */}
                     {idx === 1 && (
-                      <div
-                        className="absolute top-4 right-4 z-10 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white"
-                        style={{ backgroundColor: brand }}
-                      >
-                        En Popüler
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-emerald-600 px-3 py-0.5 text-[10px] font-bold text-white whitespace-nowrap">
+                        En Çok Tercih Edilen
                       </div>
                     )}
-
-                    {/* Image */}
-                    <div className="overflow-hidden bg-slate-50 aspect-[4/3]">
-                      <img
-                        src={product.image || undefined}
-                        alt={product.name}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                    </div>
-
-                    <div className="p-7">
-                      <h3 className="mb-1.5 text-xl font-black tracking-tight text-slate-900">
-                        {product.name}
-                      </h3>
-                      <p className="mb-6 line-clamp-2 text-sm leading-relaxed text-slate-400">
-                        {product.description}
-                      </p>
-
-                      <div className="mb-6 flex items-baseline gap-3">
-                        <span
-                          className="text-3xl font-black tracking-tight"
-                          style={{ color: isSelected ? brand : "#111827" }}
-                        >
-                          {formatCurrency(product.price)}
-                        </span>
-                        {product.oldPrice && (
-                          <span className="text-sm font-semibold text-slate-300 line-through">
+                    <Package className={cn("h-10 w-10 mx-auto mb-3", isSelected ? "text-emerald-700" : "text-emerald-600")} />
+                    <h4 className="text-xl font-bold text-slate-900">{product.name}</h4>
+                    <div className="my-4">
+                      <span className={cn("text-3xl font-black", isSelected ? "text-emerald-700" : "text-slate-900")}>
+                        {formatCurrency(product.price)}
+                      </span>
+                      {product.oldPrice && (
+                        <>
+                          <span className="text-sm text-slate-400 line-through ml-2">
                             {formatCurrency(product.oldPrice)}
                           </span>
-                        )}
-                      </div>
-
-                      <button
-                        className={cn(
-                          "w-full rounded-2xl py-3.5 text-xs font-bold uppercase tracking-wider transition-all duration-300",
-                          isSelected
-                            ? "text-white"
-                            : "bg-slate-100 text-slate-500 group-hover:bg-slate-900 group-hover:text-white"
-                        )}
-                        style={isSelected ? { backgroundColor: brand } : {}}
-                      >
-                        {isSelected ? "✓ Seçildi" : "Seti Seç"}
-                      </button>
+                          <span className="ml-2 inline-block rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700">
+                            - {formatCurrency(product.oldPrice - product.price)}
+                          </span>
+                        </>
+                      )}
                     </div>
-                  </motion.div>
+                    <button
+                      onClick={() => scrollToOrder(product)}
+                      className="w-full rounded-xl py-2.5 text-sm font-bold text-white transition-all hover:opacity-90 active:scale-95"
+                      style={{ backgroundColor: brandColor }}
+                    >
+                      {isSelected ? "Paket Seçildi" : "Bu Paketi Seç"}
+                    </button>
+                    <p className="text-xs text-slate-400 mt-3">Kargo ücreti dahil</p>
+                  </div>
                 );
               })}
             </div>
-          )}
+          </div>
         </div>
       </section>
 
@@ -602,43 +572,24 @@ export default function Home() {
           <div className="grid gap-16 lg:grid-cols-2 lg:items-start lg:gap-24">
             {/* Left – info */}
             <div className="lg:pt-4">
-              <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-slate-400">
-                {settings?.orderSubtitle || "Sipariş"}
+              <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-emerald-600">
+                Sipariş
               </p>
               <h2 className="mb-6 text-4xl font-black tracking-tight text-slate-900 md:text-5xl">
-                {settings?.orderTitle || "Güvenli Sipariş"}
+                Hızlı ve Güvenli Sipariş
               </h2>
               <p className="mb-12 max-w-sm text-base leading-relaxed text-slate-500">
-                Tüm siparişleriniz şifreli bağlantı ile iletilir. Ödemenizi kapıda, ürünü
-                kontrol ettikten sonra yapabilirsiniz.
+                Tüm siparişleriniz şifreli bağlantı ile iletilir. Ödemenizi kapıda, ürünü kontrol ettikten sonra yapabilirsiniz.
               </p>
 
               <div className="space-y-4">
                 {[
-                  {
-                    icon: ShieldCheck,
-                    title: "Sıfır Risk",
-                    desc: "Ödemeyi kapınızda, kargoyu kontrol ederek yapın.",
-                  },
-                  {
-                    icon: Award,
-                    title: "Global Standart",
-                    desc: "AB standartlarında paketleme ve hijyen kontrolü.",
-                  },
-                  {
-                    icon: Truck,
-                    title: "Hızlı Teslimat",
-                    desc: "14:00'a kadar siparişlerde aynı gün kargo.",
-                  },
+                  { icon: ShieldCheck, title: "Sıfır Risk", desc: "Ödemeyi kapınızda, kargoyu kontrol ederek yapın." },
+                  { icon: Award, title: "Dermatolojik Onay", desc: "Uzmanlar tarafından test edilmiştir." },
+                  { icon: Truck, title: "Hızlı Teslimat", desc: "14:00'a kadar siparişlerde aynı gün kargo." },
                 ].map(({ icon: Icon, title, desc }) => (
-                  <div
-                    key={title}
-                    className="flex items-start gap-4 rounded-2xl border border-slate-100 bg-slate-50 p-5"
-                  >
-                    <div
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
-                      style={{ backgroundColor: brand + "15", color: brand }}
-                    >
+                  <div key={title} className="flex items-start gap-4 rounded-2xl border border-slate-100 bg-slate-50 p-5">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
                       <Icon className="h-5 w-5" />
                     </div>
                     <div>
@@ -651,7 +602,10 @@ export default function Home() {
             </div>
 
             {/* Right – form */}
-            <div className="rounded-3xl border border-slate-100 bg-white p-8 shadow-xl shadow-slate-100 md:p-10">
+            <div 
+              ref={orderFormRef}
+              className="rounded-3xl border border-slate-100 bg-white p-8 shadow-xl shadow-slate-100 md:p-10"
+            >
               <AnimatePresence mode="wait">
                 {success ? (
                   <motion.div
@@ -661,52 +615,36 @@ export default function Home() {
                     exit={{ opacity: 0 }}
                     className="flex flex-col items-center py-16 text-center"
                   >
-                    <div
-                      className="mb-6 flex h-20 w-20 items-center justify-center rounded-full"
-                      style={{ backgroundColor: brand + "15", color: brand }}
-                    >
+                    <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
                       <CheckCircle2 className="h-10 w-10" />
                     </div>
                     <h3 className="mb-3 text-2xl font-black tracking-tight text-slate-900">
                       Siparişiniz Alındı!
                     </h3>
                     <p className="max-w-xs text-sm leading-relaxed text-slate-500">
-                      Siparişiniz sisteme işlendi. Kurye ekibimiz en kısa sürede sizinle
-                      iletişime geçecek.
+                      Siparişiniz sisteme işlendi. Kurye ekibimiz en kısa sürede sizinle iletişime geçecek.
                     </p>
                   </motion.div>
                 ) : (
-                  <motion.form
-                    key="form"
-                    onSubmit={handleSubmit}
-                    className="space-y-6"
-                  >
-                    {/* Selected product preview */}
+                  <motion.form key="form" onSubmit={handleSubmit} className="space-y-6">
                     {selectedProduct ? (
                       <div className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-slate-50 p-4">
-                        <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-slate-100">
-                          <img
-                            src={selectedProduct.image || undefined}
-                            alt={selectedProduct.name}
-                            className="h-full w-full object-cover"
-                          />
+                        <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-emerald-100 flex items-center justify-center">
+                          <Package className="h-8 w-8 text-emerald-700" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-emerald-600">
                             Seçilen Paket
                           </p>
                           <p className="truncate font-bold text-slate-900">{selectedProduct.name}</p>
-                          <p
-                            className="text-lg font-black"
-                            style={{ color: brand }}
-                          >
+                          <p className="text-lg font-black" style={{ color: brandColor }}>
                             {formatCurrency(selectedProduct.price)}
                           </p>
                         </div>
                       </div>
                     ) : (
-                      <div className="rounded-2xl border border-red-100 bg-red-50 p-4 text-center">
-                        <p className="text-xs font-semibold text-red-500">
+                      <div className="rounded-2xl border border-rose-100 bg-rose-50 p-4 text-center">
+                        <p className="text-xs font-semibold text-rose-500">
                           Lütfen yukarıdan bir paket seçerek devam edin.
                         </p>
                       </div>
@@ -769,7 +707,7 @@ export default function Home() {
                       type="submit"
                       disabled={loading || !selectedProduct}
                       className="group flex w-full items-center justify-center gap-3 rounded-2xl py-4 text-sm font-bold text-white transition-all hover:opacity-90 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40"
-                      style={{ backgroundColor: brand }}
+                      style={{ backgroundColor: brandColor }}
                     >
                       {loading ? (
                         <>
@@ -802,31 +740,26 @@ export default function Home() {
       <footer className="border-t border-slate-100 bg-slate-50 pb-10 pt-16">
         <div className="mx-auto max-w-7xl px-6">
           <div className="mb-10 flex flex-col items-start gap-8 md:flex-row md:items-center md:justify-between">
-            {/* Brand */}
             <div className="flex items-center gap-3">
               {settings?.logo ? (
                 <img src={settings.logo || undefined} alt="" className="h-8 w-auto" />
               ) : (
                 <>
-                  <div
-                    className="flex h-8 w-8 items-center justify-center rounded-lg text-white text-xs font-black"
-                    style={{ backgroundColor: brand }}
-                  >
-                    {settings?.title?.[0] || "T"}
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg text-white text-xs font-black bg-emerald-600">
+                    <Leaf className="h-4 w-4" />
                   </div>
                   <span className="font-black tracking-tight text-slate-900">
-                    {settings?.title || "Termo Maske"}
+                    {settings?.title || "GlowMask"}
                   </span>
                 </>
               )}
             </div>
 
-            {/* Social icons */}
             <div className="flex items-center gap-4">
               {[Instagram, MessageCircle, Mail].map((Icon, i) => (
                 <button
                   key={i}
-                  className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-400 transition-all hover:border-slate-900 hover:bg-slate-900 hover:text-white"
+                  className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-400 transition-all hover:border-emerald-600 hover:bg-emerald-600 hover:text-white"
                 >
                   <Icon className="h-4 w-4" />
                 </button>
@@ -837,17 +770,13 @@ export default function Home() {
           <div className="flex flex-col items-start gap-4 border-t border-slate-100 pt-8 md:flex-row md:items-center md:justify-between">
             <p className="text-xs text-slate-400">
               {settings?.footerText ||
-                `© ${new Date().getFullYear()} ${settings?.title || "Termo Maske"}. Tüm hakları saklıdır.`}
+                `© ${new Date().getFullYear()} ${settings?.title || "GlowMask"}. Tüm hakları saklıdır.`}
             </p>
             <nav className="flex flex-wrap gap-6">
               {["Mesafeli Satış", "KVKK", "Hakkımızda", "İletişim"].map((link) => (
-                <a
-                  key={link}
-                  href="#"
-                  className="text-xs text-slate-400 transition-colors hover:text-slate-900"
-                >
+                <a key={link} href="#" className="text-xs text-slate-400 transition-colors hover:text-slate-900">
                   {link}
-                </a> 
+                </a>
               ))}
             </nav>
           </div>

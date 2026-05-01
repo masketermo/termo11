@@ -37,6 +37,7 @@ export interface SiteSettings {
   heroImage: string;
   logo: string;
   brandColor: string;
+  bgColor: string;
   featuresTitle: string;
   featuresSubtitle: string;
   productsTitle: string;
