@@ -239,24 +239,46 @@ export default function Home() {
       className="min-h-screen font-sans text-slate-900 antialiased"
       style={{ backgroundColor: bgColor } as React.CSSProperties}
     >
-      {/* ── Announcement bar ─────────────────────────────────────────────── */}
-      <AnimatePresence>
-        {settings?.announcementActive && settings.announcement && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden"
-            style={{ backgroundColor: brandColor }}
-          >
-            <div className="py-2 text-center">
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-white">
-                {settings.announcement}
-              </p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* ── Scrolling Announcement bar ───────────────────────────────────── */}
+      <div
+        className="overflow-hidden py-2 relative"
+        style={{ backgroundColor: brandColor }}
+      >
+        <style>{`
+          @keyframes marquee {
+            0%   { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+          .marquee-track {
+            display: flex;
+            width: max-content;
+            animation: marquee 28s linear infinite;
+          }
+          .marquee-track:hover {
+            animation-play-state: paused;
+          }
+        `}</style>
+        <div className="marquee-track">
+          {[
+            "✨ Şişkinlik, Yorgunluk, Stres… Hepsine Tek Çözüm!",
+            "❄️ Göz Altı Şişliklerine 10 Dakikalık Çözüm!",
+            "🔥 Bugüne Özel İndirimi Kaçırmayın!",
+            "🚚💸 Kapıda Ödeme Kolaylığı",
+            "✨ Şişkinlik, Yorgunluk, Stres… Hepsine Tek Çözüm!",
+            "❄️ Göz Altı Şişliklerine 10 Dakikalık Çözüm!",
+            "🔥 Bugüne Özel İndirimi Kaçırmayın!",
+            "🚚💸 Kapıda Ödeme Kolaylığı",
+          ].map((text, i) => (
+            <span
+              key={i}
+              className="inline-flex items-center gap-3 px-8 text-[11px] font-semibold uppercase tracking-wider text-white whitespace-nowrap"
+            >
+              <span className="inline-block h-1 w-1 rounded-full bg-white/50" />
+              {text}
+            </span>
+          ))}
+        </div>
+      </div>
 
       {/* ── Header ───────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-50 border-b border-black/5 backdrop-blur-xl bg-white/90">
