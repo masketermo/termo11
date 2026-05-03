@@ -26,7 +26,9 @@ import {
   Download,
   Calendar,
   Layers,
-  Sparkles
+  Sparkles,
+  Phone,
+  Mail
 } from "lucide-react";
 import { cn, formatCurrency } from "../lib/utils";
 
@@ -268,6 +270,7 @@ function StatCard({ label, value, icon, color, sub }: any) {
 function OrdersManager() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [filter, setFilter] = useState<Order['status'] | 'all'>('all');
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   useEffect(() => {
     onValue(ref(db, "orders"), (s) => {
@@ -389,6 +392,8 @@ function OrdersManager() {
                     </td>
                     <td className="px-10 py-8 text-right">
                       <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onClick={() => setSelectedOrder(order)} className="p-3.5 text-indigo-500 hover:bg-indigo-500 hover:text-white transition-all rounded-2xl shadow-sm"><Eye className="h-4 w-4" /></button>
+                        <div className="h-8 w-[1px] bg-slate-100 mx-2" />
                         <StatusAction status="shipped" icon={<Truck />} onClick={() => updateStatus(order.id, 'shipped')} current={order.status} />
                         <StatusAction status="delivered" icon={<CheckCircle />} onClick={() => updateStatus(order.id, 'delivered')} current={order.status} />
                         <StatusAction status="cancelled" icon={<XCircle />} onClick={() => updateStatus(order.id, 'cancelled')} current={order.status} />
@@ -403,6 +408,119 @@ function OrdersManager() {
           </table>
         </div>
       </div>
+
+      {selectedOrder && (
+        <OrderDetailsModal 
+          order={selectedOrder} 
+          onClose={() => setSelectedOrder(null)} 
+        />
+      )}
+    </div>
+  );
+}
+
+function OrderDetailsModal({ order, onClose }: { order: Order; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-slate-950/70 backdrop-blur-md">
+      <motion.div 
+        initial={{ scale: 0.9, opacity: 0 }} 
+        animate={{ scale: 1, opacity: 1 }} 
+        className="w-full max-w-2xl overflow-hidden rounded-[3rem] bg-white shadow-3xl"
+      >
+        <div className="p-10 space-y-8 text-left">
+          <div className="flex items-center justify-between border-b border-slate-50 pb-6">
+            <div>
+              <h3 className="text-2xl font-black text-slate-900 tracking-tighter italic uppercase">Sipariş Detayı</h3>
+              <p className="text-[10px] font-black text-indigo-500 tracking-[0.3em] mt-1">ID: #{order.id}</p>
+            </div>
+            <button onClick={onClose} className="h-12 w-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-slate-900 hover:text-white transition-all">
+              <XCircle className="h-6 w-6" />
+            </button>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="space-y-6">
+              <div>
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 italic">Müşteri Bilgileri</label>
+                <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100">
+                  <p className="text-lg font-black text-slate-900 tracking-tight">{order.customerName}</p>
+                  <div className="mt-3 flex items-center gap-2 text-indigo-600 font-bold text-sm">
+                    <Phone className="h-4 w-4 shrink-0" />
+                    <span>{order.phone}</span>
+                  </div>
+                  <div className="mt-2 flex items-center gap-2 text-slate-500 text-sm font-bold">
+                    <Mail className="h-4 w-4 shrink-0" />
+                    <span className="truncate">{order.email || 'Email belirtilmemiş'}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 italic">Paket İçeriği</label>
+                <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0">
+                      <Package className="h-5 w-5 text-indigo-500" />
+                    </div>
+                    <div>
+                      <p className="font-black text-slate-900 text-sm">{order.productName}</p>
+                      <p className="text-[10px] font-black text-indigo-600 mt-1 uppercase tracking-widest">{formatCurrency(order.totalPrice)}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 italic">Teslimat Adresi</label>
+              <div className="bg-slate-900 rounded-[2rem] p-6 text-white shadow-xl">
+                 <div className="space-y-4">
+                    <div className="flex items-start gap-4">
+                       <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+                          <Truck className="h-5 w-5 text-indigo-400" />
+                       </div>
+                       <div>
+                          <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Şehir / İlçe</p>
+                          <p className="font-black text-lg tracking-tight">{order.city} / {order.district}</p>
+                       </div>
+                    </div>
+
+                    <div className="h-[1px] bg-white/5 w-full" />
+
+                    <div>
+                       <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Mahalle & Adres</p>
+                       <div className="font-bold text-sm leading-relaxed text-indigo-50">
+                          {order.neighborhood && <p className="mb-1">{order.neighborhood} Mah.</p>}
+                          <p className="break-words">{order.address}</p>
+                          {order.doorNumber && <p className="mt-2 bg-white/10 px-3 py-1 rounded-lg w-max text-[10px]">Kapı No: {order.doorNumber}</p>}
+                       </div>
+                    </div>
+
+                    <div className="h-[1px] bg-white/5 w-full" />
+
+                    <div className="flex justify-between items-center text-[10px]">
+                       <div>
+                          <p className="font-black text-slate-400 uppercase tracking-widest mb-1">Posta Kodu</p>
+                          <p className="font-black uppercase tracking-widest">{order.postalCode || '---'}</p>
+                       </div>
+                       <div className="text-right">
+                          <p className="font-black text-slate-400 uppercase tracking-widest mb-1">Sipariş Tarihi</p>
+                          <p className="font-bold">{new Date(order.createdAt).toLocaleString('tr-TR')}</p>
+                       </div>
+                    </div>
+                 </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-6 border-t border-slate-50 flex gap-4">
+             <button onClick={onClose} className="flex-1 px-8 py-6 bg-slate-50 text-slate-500 rounded-[2rem] font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-100 transition-all">Pencereyi Kapat</button>
+             <div className="flex-1 flex gap-2">
+                <StatusBadge status={order.status} />
+             </div>
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 }

@@ -19,6 +19,9 @@ export interface Order {
   address: string;
   city: string;
   district: string;
+  neighborhood: string;
+  postalCode: string;
+  doorNumber: string;
   totalPrice: number;
   status: 'pending' | 'shipped' | 'delivered' | 'cancelled';
   createdAt: number;
