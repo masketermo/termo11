@@ -82,13 +82,9 @@ function StarRating({ rating }: { rating: number }) {
 // ─── Main Component ──────────────────────────────────────────────────────────
 
 export default function Home() {
-  const [products, setProducts] = useState<Product[]>([
-    { id: '1', name: '1 Adet GlowMask', price: 399, oldPrice: 549, image: 'https://i.hizliresim.com/m8vz6un.png' },
-    { id: '2', name: '2 Adet GlowMask (Avantajlı)', price: 699, oldPrice: 1098, image: 'https://i.hizliresim.com/m8vz6un.png', popular: true },
-    { id: '3', name: '3 Adet GlowMask (Ekonomik)', price: 899, oldPrice: 1647, image: 'https://i.hizliresim.com/m8vz6un.png' }
-  ]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [settings, setSettings] = useState<SiteSettings | null>(null);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>({ id: '2', name: '2 Adet GlowMask (Avantajlı)', price: 699, oldPrice: 1098, image: 'https://i.hizliresim.com/m8vz6un.png', popular: true });
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const orderFormRef = useRef<HTMLDivElement>(null);
   const [showAllReviews, setShowAllReviews] = useState(false);
 
