@@ -359,7 +359,11 @@ function OrdersManager() {
                 </tr>
               ) : (
                 filteredOrders.map((order) => (
-                  <tr key={order.id} className="group hover:bg-slate-50/30 transition-all">
+                  <tr 
+                    key={order.id} 
+                    onClick={() => setSelectedOrder(order)}
+                    className="group hover:bg-slate-50/30 transition-all cursor-pointer"
+                  >
                     <td className="px-10 py-8">
                       <div className="flex items-center gap-5">
                         <div className="h-14 w-14 rounded-2xl bg-white border border-slate-100 flex items-center justify-center font-black text-slate-900 shadow-sm group-hover:shadow-indigo-100 transition-shadow">
@@ -390,7 +394,7 @@ function OrdersManager() {
                     <td className="px-6 py-8">
                       <StatusBadge status={order.status} />
                     </td>
-                    <td className="px-10 py-8 text-right">
+                    <td className="px-10 py-8 text-right" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button onClick={() => setSelectedOrder(order)} className="p-3.5 text-indigo-500 hover:bg-indigo-500 hover:text-white transition-all rounded-2xl shadow-sm"><Eye className="h-4 w-4" /></button>
                         <div className="h-8 w-[1px] bg-slate-100 mx-2" />
