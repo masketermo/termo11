@@ -754,38 +754,6 @@ function SettingsManager() {
                 </label>
               </div>
             </div>
-            <div>
-              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-2 block mb-3">Marka Tema Rengi</label>
-              <div className="flex gap-6">
-                <input
-                  type="color"
-                  className="h-32 w-32 cursor-pointer rounded-3xl border-4 border-slate-50 bg-slate-50 p-3 shadow-inner"
-                  value={settings.brandColor || '#059669'}
-                  onChange={e => setSettings({ ...settings, brandColor: e.target.value })}
-                />
-                <input
-                  className="flex-1 rounded-3xl border border-slate-100 bg-slate-50 p-6 font-black text-lg focus:border-slate-900 focus:bg-white focus:outline-none transition-all h-32 tracking-widest text-slate-900 uppercase"
-                  value={settings.brandColor || '#059669'}
-                  onChange={e => setSettings({ ...settings, brandColor: e.target.value })}
-                />
-              </div>
-            </div>
-            <div>
-              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-2 block mb-3">Ana Sayfa Arka Plan</label>
-              <div className="flex gap-6">
-                <input
-                  type="color"
-                  className="h-32 w-32 cursor-pointer rounded-3xl border-4 border-slate-50 bg-slate-50 p-3 shadow-inner"
-                  value={settings.bgColor || '#ffffff'}
-                  onChange={e => setSettings({ ...settings, bgColor: e.target.value })}
-                />
-                <input
-                  className="flex-1 rounded-3xl border border-slate-100 bg-slate-50 p-6 font-black text-lg focus:border-slate-900 focus:bg-white focus:outline-none transition-all h-32 tracking-widest text-slate-900 uppercase"
-                  value={settings.bgColor || '#ffffff'}
-                  onChange={e => setSettings({ ...settings, bgColor: e.target.value })}
-                />
-              </div>
-            </div>
           </div>
         </div>
 

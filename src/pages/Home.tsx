@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "motion/react";
 import {
   ShoppingCart, Phone, Mail, Instagram, MessageCircle,
   Truck, ShieldCheck, Star, ArrowRight,
-  CheckCircle2, Package, Award, Droplet, Sun, Leaf, Sparkles, 
+  CheckCircle2, Package, Award, Droplet, Sun, Leaf, Sparkles,
   Users, ThumbsUp, StarHalf, MapPin, Home as HomeIcon, Building2,
   ChevronRight, Zap, Microscope
 } from "lucide-react";
@@ -43,7 +43,7 @@ function InputField({
   return (
     <div className="space-y-1">
       <label className="block text-xs font-semibold text-slate-600">
-        {label} {required && <span className="text-emerald-600">*</span>}
+        {label} {required && <span style={{ color: "#fb79a0" }}>*</span>}
       </label>
       <div className="relative">
         {Icon && (
@@ -54,7 +54,7 @@ function InputField({
         <input
           {...props}
           className={cn(
-            "w-full rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm font-medium text-slate-900 placeholder:text-slate-300 transition-all focus:border-emerald-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-emerald-50",
+            "w-full rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm font-medium text-slate-900 placeholder:text-slate-300 transition-all focus:border-[#fb79a0] focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#fb79a0]/10",
             Icon && "pl-10"
           )}
         />
@@ -63,11 +63,9 @@ function InputField({
   );
 }
 
-// Star rating component
 function StarRating({ rating }: { rating: number }) {
   const fullStars = Math.floor(rating);
   const hasHalfStar = rating % 1 !== 0;
-  
   return (
     <div className="flex items-center gap-0.5">
       {Array.from({ length: fullStars }).map((_, i) => (
@@ -87,11 +85,7 @@ export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  // FIX 1: Removed unused orderSectionRef — it was declared but never assigned to any element
   const orderFormRef = useRef<HTMLDivElement>(null);
-
-  // FIX 2: showAllReviews başlangıç değeri true olarak ayarlandı (masaüstünde tüm yorumlar görünür)
-  // Mobilde CSS ile kontrol edildiğinden JS state'i masaüstü için true olmalı
   const [showAllReviews, setShowAllReviews] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -107,10 +101,8 @@ export default function Home() {
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  // FIX 3: Firebase bağlantı hatalarını yakalamak için hata state'i eklendi
   const [firebaseError, setFirebaseError] = useState(false);
 
-  // Extended reviews data - 12 reviews
   const allReviews = [
     { id: 1, name: "Ayşe Y.", rating: 5, text: "Cildim gerçekten parladı! 2 hafta içinde farkı gördüm. Gözeneklerim çok daha küçük görünüyor.", days: 3, verified: true, location: "İstanbul" },
     { id: 2, name: "Mehmet D.", rating: 5, text: "Sivilcelerim söndü, cildim pürüzsüzleşti. Kesinlikle tavsiye ederim.", days: 5, verified: true, location: "Ankara" },
@@ -126,69 +118,29 @@ export default function Home() {
     { id: 12, name: "Burcu T.", rating: 5, text: "C vitamini sayesinde lekelerim açılmaya başladı. Çok mutluyum!", days: 18, verified: true, location: "İstanbul" },
   ];
 
-  // FIX 4: Masaüstünde tüm yorumları göster, mobilde 3'te başla
-  // Önceki kod hem mobilde hem masaüstünde sadece 3 gösteriyordu (buton md:hidden ile gizliydi)
-  const displayedReviews = showAllReviews ? allReviews : allReviews.slice(0, 3);
-
-  // ─── Data fetching ─────────────────────────────────────────────────────────
   useEffect(() => {
-    // FIX 5: Firebase işlemlerini try-catch içine aldık
-    // Önceki kodda db undefined/null geldiğinde ya da Firebase config hatalıysa
-    // yakalanmamış bir hata fırlatıyor ve React 18 tüm component ağacını kaldırıyordu (beyaz ekran)
     let unsubProducts: (() => void) | undefined;
     let unsubSettings: (() => void) | undefined;
-
     try {
       const productsRef = ref(db, "products");
       const settingsRef = ref(db, "settings");
-
-      unsubProducts = onValue(
-        productsRef,
-        (snapshot) => {
-          try {
-            const data = snapshot.val();
-            if (data) {
-              const loaded = Object.keys(data).map((key) => ({ id: key, ...data[key] }));
-              setProducts(loaded);
-              // FIX 6: selectedProduct'ı prev kontrolü ile güvenli şekilde set ediyoruz
-              setSelectedProduct((prev) => prev ?? loaded[0] ?? null);
-            }
-          } catch (err) {
-            console.error("Products parse error:", err);
+      unsubProducts = onValue(productsRef, (snapshot) => {
+        try {
+          const data = snapshot.val();
+          if (data) {
+            const loaded = Object.keys(data).map((key) => ({ id: key, ...data[key] }));
+            setProducts(loaded);
+            setSelectedProduct((prev) => prev ?? loaded[0] ?? null);
           }
-        },
-        (error) => {
-          // FIX 7: onValue'nun üçüncü parametresi hata callback'i — önceden eksikti
-          console.error("Firebase products read error:", error);
-          setFirebaseError(true);
-        }
-      );
-
-      unsubSettings = onValue(
-        settingsRef,
-        (snapshot) => {
-          try {
-            setSettings(snapshot.val());
-          } catch (err) {
-            console.error("Settings parse error:", err);
-          }
-        },
-        (error) => {
-          console.error("Firebase settings read error:", error);
-        }
-      );
-    } catch (err) {
-      console.error("Firebase initialization error:", err);
-      setFirebaseError(true);
-    }
-
-    return () => {
-      if (unsubProducts) unsubProducts();
-      if (unsubSettings) unsubSettings();
-    };
+        } catch (err) { console.error("Products parse error:", err); }
+      }, (error) => { console.error("Firebase products read error:", error); setFirebaseError(true); });
+      unsubSettings = onValue(settingsRef, (snapshot) => {
+        try { setSettings(snapshot.val()); } catch (err) { console.error("Settings parse error:", err); }
+      }, (error) => { console.error("Firebase settings read error:", error); });
+    } catch (err) { console.error("Firebase initialization error:", err); setFirebaseError(true); }
+    return () => { if (unsubProducts) unsubProducts(); if (unsubSettings) unsubSettings(); };
   }, []);
 
-  // ─── Handlers ─────────────────────────────────────────────────────────────
   const scrollToOrder = (product: Product) => {
     setSelectedProduct(product);
     setTimeout(() => orderFormRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 50);
@@ -198,11 +150,9 @@ export default function Home() {
     e.preventDefault();
     if (!selectedProduct) return;
     setLoading(true);
-
     try {
       const ordersRef = ref(db, "orders");
       const newOrderRef = push(ordersRef);
-
       await set(newOrderRef, {
         ...formData,
         productId: selectedProduct.id,
@@ -212,12 +162,8 @@ export default function Home() {
         paymentMethod: "kapidaOdeme",
         createdAt: Date.now(),
       });
-
       setSuccess(true);
-      setFormData({ 
-        customerName: "", phone: "", email: "", address: "", city: "", district: "",
-        neighborhood: "", postalCode: "", doorNumber: "" 
-      });
+      setFormData({ customerName: "", phone: "", email: "", address: "", city: "", district: "", neighborhood: "", postalCode: "", doorNumber: "" });
       setTimeout(() => setSuccess(false), 8000);
     } catch (error) {
       console.error(error);
@@ -227,23 +173,17 @@ export default function Home() {
     }
   };
 
-  const brandColor = settings?.brandColor || "#059669";
-  const bgColor = settings?.bgColor || "#ffffff";
-
-  // Calculate average rating
+  const brandColor = "#fb79a0";
+  const bgColor = "#f7e4e7";
   const avgRating = (allReviews.reduce((acc, r) => acc + r.rating, 0) / allReviews.length).toFixed(1);
 
-  // ─── Render ────────────────────────────────────────────────────────────────
   return (
     <div
       className="min-h-screen font-sans text-slate-900 antialiased"
-      style={{ backgroundColor: bgColor } as React.CSSProperties}
+      style={{ backgroundColor: bgColor }}
     >
-      {/* ── Scrolling Announcement bar ───────────────────────────────────── */}
-      <div
-        className="overflow-hidden py-2 relative"
-        style={{ backgroundColor: brandColor }}
-      >
+      {/* ── Announcement Bar ─────────────────────────────────────────────── */}
+      <div className="overflow-hidden py-2 relative" style={{ backgroundColor: brandColor }}>
         <style>{`
           @keyframes marquee {
             0%   { transform: translateX(0); }
@@ -254,9 +194,7 @@ export default function Home() {
             width: max-content;
             animation: marquee 28s linear infinite;
           }
-          .marquee-track:hover {
-            animation-play-state: paused;
-          }
+          .marquee-track:hover { animation-play-state: paused; }
         `}</style>
         <div className="marquee-track">
           {[
@@ -269,10 +207,7 @@ export default function Home() {
             "🔥 Bugüne Özel İndirimi Kaçırmayın!",
             "🚚💸 Kapıda Ödeme Kolaylığı",
           ].map((text, i) => (
-            <span
-              key={i}
-              className="inline-flex items-center gap-3 px-8 text-[11px] font-semibold uppercase tracking-wider text-white whitespace-nowrap"
-            >
+            <span key={i} className="inline-flex items-center gap-3 px-8 text-[11px] font-semibold uppercase tracking-wider text-white whitespace-nowrap">
               <span className="inline-block h-1 w-1 rounded-full bg-white/50" />
               {text}
             </span>
@@ -291,7 +226,6 @@ export default function Home() {
               {settings?.title || "GlowMask"}
             </span>
           </div>
-
           <div className="flex items-center gap-2">
             {settings?.whatsapp && (
               <a
@@ -317,20 +251,16 @@ export default function Home() {
       </header>
 
       {/* ── Hero Section ─────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden py-12 md:py-20" style={{ background: `linear-gradient(135deg, ${brandColor} 0%, ${brandColor}CC 100%)` }}>
-        <div className="absolute inset-0 overflow-hidden">
+      <section
+        className="relative overflow-hidden py-8 md:py-12"
+        style={{ background: `linear-gradient(135deg, ${brandColor} 0%, ${brandColor}CC 100%)` }}
+      >
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-white/10 blur-3xl" />
           <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-white/5 blur-3xl" />
         </div>
-        
-        <div className="relative mx-auto max-w-7xl px-4 md:px-6">
-          <div className="text-center mb-6">
-            <Badge style={{ color: "white", borderColor: "rgba(255,255,255,0.3)", backgroundColor: "rgba(255,255,255,0.1)" }}>
-              <Sparkles className="h-3 w-3" />
-              Cilt Yenilemenin Yeni Formülü
-            </Badge>
-          </div>
 
+        <div className="relative mx-auto max-w-7xl px-4 md:px-6">
           <div className="grid gap-8 md:gap-12 lg:grid-cols-2 lg:items-center">
             {/* Left – copy */}
             <motion.div
@@ -339,41 +269,28 @@ export default function Home() {
               transition={{ duration: 0.7 }}
             >
               <h1 className="mb-4 text-4xl font-black leading-[1.1] tracking-tight text-white md:text-5xl lg:text-6xl">
-                Yeni <span className="text-white/90">GlowMask</span><br />
-                Maske
+                Yeni <span className="text-white/90">GlowMask</span><br />Maske
               </h1>
 
-              <div className="space-y-4 mb-6">
-                <div className="flex gap-3 items-start">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/20 text-white">
-                    <Zap className="h-4 w-4" />
+              <div className="space-y-3 mb-5">
+                {[
+                  { icon: Zap, title: "Gözenekleri Derinlemesine Temizler", desc: "Yağ ve kiri arındırır, gözenek görünümünü azaltır." },
+                  { icon: Droplet, title: "Derin Nemlendirme", desc: "Hyaluronik asit ile cildi nemlendirir ve besler." },
+                  { icon: Sun, title: "Cildi Aydınlatır", desc: "C vitamini ile renk tonunu eşitler ve parlaklık verir." },
+                ].map(({ icon: Icon, title, desc }) => (
+                  <div key={title} className="flex gap-3 items-start">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/20 text-white">
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-white text-sm">{title}</p>
+                      <p className="text-xs text-white/70">{desc}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-bold text-white text-sm">Gözenekleri Derinlemesine Temizler</p>
-                    <p className="text-xs text-white/70">Yağ ve kiri arındırır, gözenek görünümünü azaltır.</p>
-                  </div>
-                </div>
-                <div className="flex gap-3 items-start">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/20 text-white">
-                    <Droplet className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-white text-sm">Derin Nemlendirme</p>
-                    <p className="text-xs text-white/70">Hyaluronik asit ile cildi nemlendirir ve besler.</p>
-                  </div>
-                </div>
-                <div className="flex gap-3 items-start">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/20 text-white">
-                    <Sun className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-white text-sm">Cildi Aydınlatır</p>
-                    <p className="text-xs text-white/70">C vitamini ile renk tonunu eşitler ve parlaklık verir.</p>
-                  </div>
-                </div>
+                ))}
               </div>
 
-              <div className="mb-6 flex flex-wrap items-center gap-2">
+              <div className="mb-5 flex flex-wrap items-center gap-2">
                 <FeaturePill icon={Truck} label="Aynı Gün Kargo" />
                 <FeaturePill icon={ShieldCheck} label="Kapıda Ödeme" />
                 <FeaturePill icon={Package} label="30 Gün İade" />
@@ -400,14 +317,14 @@ export default function Home() {
               </div>
             </motion.div>
 
-            {/* Right – model image */}
+            {/* Right – image */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.7 }}
-              className="relative"
+              className="relative lg:ml-auto lg:max-w-md"
             >
-              <div className="relative overflow-hidden rounded-2xl aspect-[4/5] shadow-xl">
+              <div className="relative overflow-hidden rounded-2xl aspect-square shadow-xl">
                 {settings?.heroImage ? (
                   <img src={settings.heroImage} alt="Gülümseyen model" className="h-full w-full object-cover" />
                 ) : (
@@ -424,10 +341,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Before-After Section ─────────────────────────────────────────── */}
-      <section className="py-12 md:py-16" style={{ backgroundColor: bgColor }}>
+      {/* ── Before-After / Science Section ───────────────────────────────── */}
+      <section className="py-8 md:py-12" style={{ backgroundColor: bgColor }}>
         <div className="mx-auto max-w-7xl px-4 md:px-6">
-          <div className="text-center mb-8">
+          <div className="text-center mb-6">
             <h2 className="text-2xl md:text-3xl font-black tracking-tight" style={{ color: brandColor }}>
               Zararsız ve Etkili Olduğu Kanıtlandı
             </h2>
@@ -435,51 +352,57 @@ export default function Home() {
 
           <div className="grid gap-8 md:gap-12 lg:grid-cols-2 lg:items-center">
             {/* Before-After */}
-            <div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-xl overflow-hidden bg-slate-100 shadow">
-                  <div className="aspect-[3/4] bg-gradient-to-br from-rose-100 to-slate-200 flex items-center justify-center">
-                    {settings?.beforeImage ? (
-                      <img src={settings.beforeImage} alt="Önce" className="h-full w-full object-cover" />
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                {
+                  key: "before",
+                  img: settings?.beforeImage,
+                  alt: "Önce",
+                  label: "ÖNCE",
+                  fallbackBg: "from-rose-100 to-slate-200",
+                  fallbackIcon: null,
+                  fallbackText: "Sivilce & Pürüzlü Cilt",
+                  fallbackColor: "text-rose-600",
+                },
+                {
+                  key: "after",
+                  img: settings?.afterImage,
+                  alt: "Sonra",
+                  label: "SONRA",
+                  fallbackBg: "from-emerald-100 to-slate-100",
+                  fallbackIcon: <Sparkles className="h-6 w-6" style={{ color: brandColor }} />,
+                  fallbackText: "Pürüzsüz & Temiz",
+                  fallbackColor: "",
+                },
+              ].map(({ key, img, alt, label, fallbackBg, fallbackIcon, fallbackText, fallbackColor }) => (
+                <div key={key} className="rounded-xl overflow-hidden bg-slate-100 shadow">
+                  <div className={`aspect-[3/4] bg-gradient-to-br ${fallbackBg} flex items-center justify-center`}>
+                    {img ? (
+                      <img src={img} alt={alt} className="h-full w-full object-cover" />
                     ) : (
                       <div className="text-center p-6">
-                        <div className="w-20 h-20 mx-auto rounded-full bg-rose-200/50 mb-3" />
-                        <p className="text-xs font-semibold text-rose-600">Sivilce & Pürüzlü Cilt</p>
-                      </div>
-                    )}
-                  </div>
-                  <div className="py-2 text-center" style={{ backgroundColor: brandColor + "15" }}>
-                    <span className="text-xs font-bold uppercase tracking-widest" style={{ color: brandColor }}>ÖNCE</span>
-                  </div>
-                </div>
-                <div className="rounded-xl overflow-hidden bg-slate-100 shadow">
-                  <div className="aspect-[3/4] bg-gradient-to-br from-emerald-100 to-slate-100 flex items-center justify-center">
-                    {settings?.afterImage ? (
-                      <img src={settings.afterImage} alt="Sonra" className="h-full w-full object-cover" />
-                    ) : (
-                      <div className="text-center p-6">
-                        <div className="w-20 h-20 mx-auto rounded-full bg-emerald-200/50 mb-3 flex items-center justify-center">
-                          <Sparkles className="h-6 w-6" style={{ color: brandColor }} />
+                        <div className={`w-20 h-20 mx-auto rounded-full mb-3 flex items-center justify-center ${key === "before" ? "bg-rose-200/50" : "bg-emerald-200/50"}`}>
+                          {fallbackIcon}
                         </div>
-                        <p className="text-xs font-semibold" style={{ color: brandColor }}>Pürüzsüz & Temiz</p>
+                        <p className={`text-xs font-semibold ${fallbackColor}`} style={key === "after" ? { color: brandColor } : {}}>{fallbackText}</p>
                       </div>
                     )}
                   </div>
                   <div className="py-2 text-center" style={{ backgroundColor: brandColor + "15" }}>
-                    <span className="text-xs font-bold uppercase tracking-widest" style={{ color: brandColor }}>SONRA</span>
+                    <span className="text-xs font-bold uppercase tracking-widest" style={{ color: brandColor }}>{label}</span>
                   </div>
                 </div>
-              </div>
+              ))}
             </div>
 
             {/* Scientific proof */}
-            <div>
-              <p className="text-base md:text-lg font-bold text-slate-900 mb-3">
+            <div className="space-y-4">
+              <p className="text-base md:text-lg font-bold text-slate-900">
                 Yapılan çalışmalar, <span style={{ color: brandColor }}>GlowMask Maske</span>'nin cildi tahriş etmeden etkili bir şekilde yenilediğini ve pürüzsüzleştirdiğini doğrulamaktadır.
               </p>
-              
-              <div className="flex items-center gap-4 mb-4 rounded-xl p-3 border" style={{ backgroundColor: brandColor + "08", borderColor: brandColor + "20" }}>
-                <div className="w-14 h-14 rounded-lg flex items-center justify-center" style={{ backgroundColor: brandColor + "20" }}>
+
+              <div className="flex items-center gap-4 rounded-xl p-3 border" style={{ backgroundColor: brandColor + "08", borderColor: brandColor + "20" }}>
+                <div className="w-14 h-14 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: brandColor + "20" }}>
                   <Microscope className="h-7 w-7" style={{ color: brandColor }} />
                 </div>
                 <div>
@@ -505,119 +428,117 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Psychological Impact & Social Proof ──────────────────────────── */}
-      <section className="py-12 md:py-16" style={{ backgroundColor: brandColor + "06" }}>
+      {/* ── Reviews & Products Section ───────────────────────────────────── */}
+      <section className="py-6 md:py-8" style={{ backgroundColor: brandColor + "06" }}>
         <div className="mx-auto max-w-7xl px-4 md:px-6">
-          <div className="text-center mb-8">
+
+          {/* Section header */}
+          <div className="text-center mb-5">
             <p className="text-xs font-semibold mb-1 tracking-wider" style={{ color: brandColor }}>PSİKOLOJİK ETKİ</p>
-            <h2 className="text-xl md:text-2xl font-black tracking-tight text-slate-900 mb-2">
+            <h2 className="text-xl md:text-2xl font-black tracking-tight text-slate-900 mb-1">
               Cilt Pürüzleri Sosyal Kaygıyı Artırıyor
             </h2>
             <p className="text-base md:text-lg font-bold" style={{ color: brandColor }}>
               Pürüzsüz Cilt ile Güveninizi Geri Kazanın
+            </p>
+            <p className="max-w-2xl mx-auto text-xs md:text-sm text-slate-600 mt-2 leading-relaxed">
+              Cilt sağlığı sadece fiziksel değil, psikolojik bir süreçtir. Yapılan araştırmalar, pürüzsüz ve nemli bir cildin sosyal ortamlarda özgüveni %84'e kadar artırdığını kanıtlıyor. GlowMask ile her güne daha güvenli başlayın.
             </p>
             <div className="inline-block mt-3 rounded-full px-3 py-1" style={{ backgroundColor: brandColor + "15" }}>
               <span className="text-xs font-bold" style={{ color: brandColor }}>1 Ayda Cilt Değişimi İmkanı</span>
             </div>
           </div>
 
-          {/* Reviews section */}
-          <div className="mb-10">
-            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-              <div>
-                <div className="flex items-center gap-1 mb-0.5">
-                  <div className="flex items-center gap-0.5">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
-                    ))}
-                  </div>
-                  <span className="text-base font-bold text-slate-900">{avgRating}</span>
+          {/* Reviews header row */}
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+            <div>
+              <div className="flex items-center gap-1 mb-0.5">
+                <div className="flex items-center gap-0.5">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
+                  ))}
                 </div>
-                <p className="text-xs text-slate-500"><span className="font-bold text-slate-900">12,000+</span> müşteri yorumu</p>
+                <span className="text-base font-bold text-slate-900">{avgRating}</span>
               </div>
-              <div className="flex items-center gap-1 text-xs" style={{ color: brandColor }}>
-                <Users className="h-3 w-3" />
-                <span className="font-semibold">98% Mutlu Müşteri</span>
-              </div>
+              <p className="text-xs text-slate-500"><span className="font-bold text-slate-900">12,000+</span> müşteri yorumu</p>
             </div>
+            <div className="flex items-center gap-1 text-xs" style={{ color: brandColor }}>
+              <Users className="h-3 w-3" />
+              <span className="font-semibold">98% Mutlu Müşteri</span>
+            </div>
+          </div>
 
-            {/* FIX 8: Masaüstünde tüm yorumları göster, mobilde displayedReviews kullan */}
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {/* Masaüstünde (md ve üzeri) tüm yorumlar görünür */}
-              {allReviews.map((review) => (
-                <div
-                  key={review.id}
-                  className={cn(
-                    "bg-white rounded-xl p-3 shadow-sm border border-slate-100",
-                    // FIX 9: Mobilde sadece ilk 3 yorum görünür, showAllReviews true olunca hepsi görünür
-                    review.id > 3 && !showAllReviews ? "hidden md:block" : "block"
+          {/* Reviews grid */}
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-4">
+            {allReviews.map((review) => (
+              <div
+                key={review.id}
+                className={cn(
+                  "bg-white rounded-xl p-3 shadow-sm border border-slate-100",
+                  review.id > 3 && !showAllReviews ? "hidden md:block" : "block"
+                )}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-white font-bold text-[10px] shrink-0" style={{ backgroundColor: brandColor }}>
+                    {review.name.charAt(0)}
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-900">{review.name}</p>
+                    <div className="flex items-center gap-1">
+                      <StarRating rating={review.rating} />
+                      <span className="text-[9px] text-slate-400">{review.days} gün</span>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-xs text-slate-600 leading-relaxed line-clamp-2">"{review.text}"</p>
+                <div className="mt-2 flex items-center justify-between">
+                  <div className="flex items-center gap-1" style={{ color: brandColor }}>
+                    <ThumbsUp className="h-2.5 w-2.5" />
+                    <span className="text-[9px] font-semibold">Faydalı</span>
+                  </div>
+                  {review.verified && (
+                    <span className="text-[8px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full">✓ Doğrulandı</span>
                   )}
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-white font-bold text-[10px]" style={{ backgroundColor: brandColor }}>
-                      {review.name.charAt(0)}
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-slate-900">{review.name}</p>
-                      <div className="flex items-center gap-1">
-                        <StarRating rating={review.rating} />
-                        <span className="text-[9px] text-slate-400">{review.days} gün</span>
-                      </div>
-                    </div>
-                  </div>
-                  <p className="text-xs text-slate-600 leading-relaxed line-clamp-2">"{review.text}"</p>
-                  <div className="mt-2 flex items-center justify-between">
-                    <div className="flex items-center gap-1" style={{ color: brandColor }}>
-                      <ThumbsUp className="h-2.5 w-2.5" />
-                      <span className="text-[9px] font-semibold">Faydalı</span>
-                    </div>
-                    {review.verified && (
-                      <span className="text-[8px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full">✓ Doğrulandı</span>
-                    )}
-                  </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
+          </div>
 
-            {/* Show more/less buttons - only on mobile */}
-            {!showAllReviews && (
-              <div className="text-center mt-4 md:hidden">
-                <button
-                  onClick={() => setShowAllReviews(true)}
-                  className="inline-flex items-center gap-1 rounded-full px-4 py-2 text-xs font-semibold text-white"
-                  style={{ backgroundColor: brandColor }}
-                >
-                  Devamını Göster ({allReviews.length - 3} yorum daha)
-                  <ChevronRight className="h-3 w-3" />
-                </button>
-              </div>
-            )}
-            {showAllReviews && (
-              <div className="text-center mt-4 md:hidden">
-                <button
-                  onClick={() => setShowAllReviews(false)}
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500"
-                >
-                  Az Göster
-                </button>
-              </div>
+          {/* Show more/less — mobile only */}
+          <div className="text-center md:hidden mb-8">
+            {!showAllReviews ? (
+              <button
+                onClick={() => setShowAllReviews(true)}
+                className="inline-flex items-center gap-1 rounded-full px-4 py-2 text-xs font-semibold text-white"
+                style={{ backgroundColor: brandColor }}
+              >
+                Devamını Göster ({allReviews.length - 3} yorum daha)
+                <ChevronRight className="h-3 w-3" />
+              </button>
+            ) : (
+              <button
+                onClick={() => setShowAllReviews(false)}
+                className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500"
+              >
+                Az Göster
+              </button>
             )}
           </div>
 
-          {/* Price packages */}
+          {/* Products */}
           <div>
-            <h3 className="text-lg md:text-xl font-black text-center text-slate-900 mb-6">{settings?.productsTitle || "Paketleri İncele"}</h3>
+            <h3 className="text-lg md:text-xl font-black text-center text-slate-900 mb-5">
+              {settings?.productsTitle || "Paketleri İncele"}
+            </h3>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {products.map((product, idx) => {
                 const isSelected = selectedProduct?.id === product.id;
                 return (
-                  <div 
+                  <div
                     key={product.id}
                     className={cn(
                       "relative rounded-xl p-4 text-center border transition-all cursor-pointer",
-                      isSelected 
-                        ? "shadow-md scale-[1.01]" 
-                        : "bg-white border-slate-100 shadow-sm"
+                      isSelected ? "shadow-md scale-[1.01]" : "bg-white border-slate-100 shadow-sm"
                     )}
                     style={isSelected ? { borderColor: brandColor, backgroundColor: brandColor + "02" } : {}}
                     onClick={() => setSelectedProduct(product)}
@@ -627,7 +548,7 @@ export default function Home() {
                         En Popüler
                       </div>
                     )}
-                    <div className="mx-auto mb-2 h-16 w-16 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center">
+                    <div className="mx-auto mb-2 h-16 w-16 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden">
                       {product.image ? (
                         <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
                       ) : (
@@ -636,14 +557,12 @@ export default function Home() {
                     </div>
                     <h4 className="text-base font-bold text-slate-900">{product.name}</h4>
                     <div className="my-2">
-                      <span className={cn("text-xl font-black", isSelected ? "text-emerald-700" : "text-slate-900")} style={isSelected ? { color: brandColor } : {}}>
+                      <span className="text-xl font-black" style={isSelected ? { color: brandColor } : {}}>
                         {formatCurrency(product.price)}
                       </span>
                       {product.oldPrice && (
                         <>
-                          <span className="text-xs text-slate-400 line-through ml-1">
-                            {formatCurrency(product.oldPrice)}
-                          </span>
+                          <span className="text-xs text-slate-400 line-through ml-1">{formatCurrency(product.oldPrice)}</span>
                           <span className="ml-1 inline-block rounded-full px-1 py-0.5 text-[8px] font-bold text-white" style={{ backgroundColor: brandColor }}>
                             -{Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)}%
                           </span>
@@ -651,10 +570,7 @@ export default function Home() {
                       )}
                     </div>
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        scrollToOrder(product);
-                      }}
+                      onClick={(e) => { e.stopPropagation(); scrollToOrder(product); }}
                       className="w-full rounded-lg py-2 text-xs font-bold text-white transition-all active:scale-95"
                       style={{ backgroundColor: brandColor }}
                     >
@@ -668,17 +584,17 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Order form - Kapıda Ödeme ──────────────────────────────────────── */}
-      <section className="py-12 md:py-16" style={{ backgroundColor: bgColor }}>
+      {/* ── Order Form ───────────────────────────────────────────────────── */}
+      <section className="py-8 md:py-12" style={{ backgroundColor: bgColor }}>
         <div className="mx-auto max-w-7xl px-4 md:px-6">
           <div className="text-center mb-6">
             <h2 className="text-2xl md:text-3xl font-black text-slate-900">Kapıda Ödeme</h2>
             <p className="text-sm text-slate-500 mt-1">Formu doldurun, 3 gün içinde kapınıza gelsin!</p>
           </div>
 
-          <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
+          <div className="grid gap-6 lg:grid-cols-2 lg:gap-10">
             {/* Left – info */}
-            <div className="order-2 lg:order-1">
+            <div className="order-2 lg:order-1 space-y-4">
               <div className="rounded-xl border border-slate-100 p-5" style={{ backgroundColor: brandColor + "04" }}>
                 <h3 className="font-bold text-slate-900 mb-3 flex items-center gap-2">
                   <Truck className="h-4 w-4" style={{ color: brandColor }} />
@@ -692,7 +608,7 @@ export default function Home() {
                 </ul>
               </div>
 
-              <div className="mt-5 rounded-xl border border-slate-100 p-5">
+              <div className="rounded-xl border border-slate-100 p-5 bg-white">
                 <h3 className="font-bold text-slate-900 mb-3 flex items-center gap-2">
                   <ShieldCheck className="h-4 w-4" style={{ color: brandColor }} />
                   Neden Kapıda Ödeme?
@@ -701,14 +617,14 @@ export default function Home() {
                   Online alışverişlerinizde güvenli ödeme yöntemi. Ürününüzü teslim aldıktan sonra ödemenizi yaparsınız.
                 </p>
                 <div className="flex items-center gap-2 text-xs text-slate-400">
-                  <span className="h-1 w-1 rounded-full bg-emerald-500"></span>
+                  <span className="h-1 w-1 rounded-full bg-emerald-500" />
                   <span>Kredi kartı bilgileriniz paylaşılmaz</span>
                 </div>
               </div>
             </div>
 
             {/* Right – form */}
-            <div 
+            <div
               ref={orderFormRef}
               className="order-1 lg:order-2 rounded-xl border border-slate-200 bg-white p-5 shadow-lg"
             >
@@ -731,12 +647,12 @@ export default function Home() {
                   </motion.div>
                 ) : (
                   <motion.form key="form" onSubmit={handleSubmit} className="space-y-4">
-                    {/* Selected product */}
+                    {/* Selected product preview */}
                     {selectedProduct ? (
                       <div className="flex items-center gap-3 rounded-lg border border-slate-100 p-3" style={{ backgroundColor: brandColor + "04" }}>
-                        <div className="h-12 w-12 shrink-0 rounded-lg flex items-center justify-center" style={{ backgroundColor: brandColor + "15" }}>
+                        <div className="h-12 w-12 shrink-0 rounded-lg flex items-center justify-center overflow-hidden" style={{ backgroundColor: brandColor + "15" }}>
                           {selectedProduct.image ? (
-                            <img src={selectedProduct.image} alt={selectedProduct.name} className="h-full w-full object-cover rounded-lg" />
+                            <img src={selectedProduct.image} alt={selectedProduct.name} className="h-full w-full object-cover" />
                           ) : (
                             <Package className="h-5 w-5" style={{ color: brandColor }} />
                           )}
@@ -753,91 +669,28 @@ export default function Home() {
                       </div>
                     )}
 
-                    {/* Personal Info */}
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <InputField
-                        label="Ad Soyad"
-                        required
-                        placeholder="Adınız Soyadınız"
-                        icon={Users}
-                        value={formData.customerName}
-                        onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
-                      />
-                      <InputField
-                        label="Telefon"
-                        required
-                        type="tel"
-                        placeholder="05XX XXX XX XX"
-                        icon={Phone}
-                        value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      />
+                      <InputField label="Ad Soyad" required placeholder="Adınız Soyadınız" icon={Users} value={formData.customerName} onChange={(e) => setFormData({ ...formData, customerName: e.target.value })} />
+                      <InputField label="Telefon" required type="tel" placeholder="05XX XXX XX XX" icon={Phone} value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
                     </div>
 
-                    <InputField
-                      label="E-posta"
-                      required
-                      type="email"
-                      placeholder="ad@ornek.com"
-                      icon={Mail}
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    />
+                    <InputField label="E-posta" required type="email" placeholder="ad@ornek.com" icon={Mail} value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
 
-                    {/* Address Fields */}
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <InputField
-                        label="İl / Şehir"
-                        required
-                        placeholder="İstanbul"
-                        icon={MapPin}
-                        value={formData.city}
-                        onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                      />
-                      <InputField
-                        label="İlçe"
-                        required
-                        placeholder="Kadıköy"
-                        icon={Building2}
-                        value={formData.district}
-                        onChange={(e) => setFormData({ ...formData, district: e.target.value })}
-                      />
+                      <InputField label="İl / Şehir" required placeholder="İstanbul" icon={MapPin} value={formData.city} onChange={(e) => setFormData({ ...formData, city: e.target.value })} />
+                      <InputField label="İlçe" required placeholder="Kadıköy" icon={Building2} value={formData.district} onChange={(e) => setFormData({ ...formData, district: e.target.value })} />
                     </div>
 
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <InputField
-                        label="Mahalle"
-                        placeholder="Mahalle adı"
-                        icon={HomeIcon}
-                        value={formData.neighborhood}
-                        onChange={(e) => setFormData({ ...formData, neighborhood: e.target.value })}
-                      />
-                      <InputField
-                        label="Posta Kodu"
-                        placeholder="34000"
-                        value={formData.postalCode}
-                        onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
-                      />
+                      <InputField label="Mahalle" placeholder="Mahalle adı" icon={HomeIcon} value={formData.neighborhood} onChange={(e) => setFormData({ ...formData, neighborhood: e.target.value })} />
+                      <InputField label="Posta Kodu" placeholder="34000" value={formData.postalCode} onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })} />
                     </div>
 
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <InputField
-                        label="Adres"
-                        required
-                        placeholder="Cadde, sokak"
-                        value={formData.address}
-                        onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                      />
-                      <InputField
-                        label="Kapı No"
-                        required
-                        placeholder="Apartman, daire no"
-                        value={formData.doorNumber}
-                        onChange={(e) => setFormData({ ...formData, doorNumber: e.target.value })}
-                      />
+                      <InputField label="Adres" required placeholder="Cadde, sokak" value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} />
+                      <InputField label="Kapı No" required placeholder="Apartman, daire no" value={formData.doorNumber} onChange={(e) => setFormData({ ...formData, doorNumber: e.target.value })} />
                     </div>
 
-                    {/* Kapıda Ödeme Notice */}
                     <div className="rounded-lg p-3 text-center border" style={{ backgroundColor: brandColor + "08", borderColor: brandColor + "20" }}>
                       <p className="text-sm font-semibold" style={{ color: brandColor }}>💳 Kapıda Ödeme</p>
                       <p className="text-xs text-slate-500 mt-0.5">Siparişiniz kapınıza geldiğinde ödemenizi nakit veya kart ile yapabilirsiniz.</p>
@@ -877,9 +730,9 @@ export default function Home() {
       </section>
 
       {/* ── Footer ───────────────────────────────────────────────────────── */}
-      <footer className="border-t border-slate-100 py-8" style={{ backgroundColor: brandColor + "04" }}>
+      <footer className="border-t border-slate-100 py-6" style={{ backgroundColor: brandColor + "04" }}>
         <div className="mx-auto max-w-7xl px-4 md:px-6">
-          <div className="flex flex-col items-center gap-4 md:flex-row md:justify-between">
+          <div className="flex flex-col items-center gap-3 md:flex-row md:justify-between">
             <div className="flex items-center gap-2">
               <div className="flex h-7 w-7 items-center justify-center rounded-lg" style={{ backgroundColor: brandColor }}>
                 <Leaf className="h-3.5 w-3.5 text-white" />
@@ -888,11 +741,15 @@ export default function Home() {
             </div>
 
             <div className="flex items-center gap-3">
-              {[Instagram, MessageCircle, Mail].map((Icon, i) => (
-                <button key={i} className="text-slate-400 hover:text-slate-600 transition-colors">
-                  <Icon className="h-4 w-4" />
-                </button>
-              ))}
+              <a href="https://www.instagram.com/masketermo/" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-slate-600 transition-colors">
+                <Instagram className="h-4 w-4" />
+              </a>
+              <a href="https://wa.me/905434352256" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-slate-600 transition-colors">
+                <MessageCircle className="h-4 w-4" />
+              </a>
+              <a href="mailto:masketermo@gmail.com" className="text-slate-400 hover:text-slate-600 transition-colors">
+                <Mail className="h-4 w-4" />
+              </a>
             </div>
 
             <p className="text-[10px] text-slate-400 text-center">
