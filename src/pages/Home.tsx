@@ -82,9 +82,13 @@ function StarRating({ rating }: { rating: number }) {
 // ─── Main Component ──────────────────────────────────────────────────────────
 
 export default function Home() {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>([
+    { id: '1', name: '1 Adet GlowMask', price: 399, oldPrice: 549, image: 'https://i.hizliresim.com/m8vz6un.png' },
+    { id: '2', name: '2 Adet GlowMask (Avantajlı)', price: 699, oldPrice: 1098, image: 'https://i.hizliresim.com/m8vz6un.png', popular: true },
+    { id: '3', name: '3 Adet GlowMask (Ekonomik)', price: 899, oldPrice: 1647, image: 'https://i.hizliresim.com/m8vz6un.png' }
+  ]);
   const [settings, setSettings] = useState<SiteSettings | null>(null);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>({ id: '2', name: '2 Adet GlowMask (Avantajlı)', price: 699, oldPrice: 1098, image: 'https://i.hizliresim.com/m8vz6un.png', popular: true });
   const orderFormRef = useRef<HTMLDivElement>(null);
   const [showAllReviews, setShowAllReviews] = useState(false);
 
@@ -325,16 +329,7 @@ export default function Home() {
               className="relative lg:ml-auto lg:max-w-md"
             >
               <div className="relative overflow-hidden rounded-2xl aspect-square shadow-xl">
-                {settings?.heroImage ? (
-                  <img src={settings.heroImage} alt="Gülümseyen model" className="h-full w-full object-cover" />
-                ) : (
-                  <div className="flex h-full w-full flex-col items-center justify-center bg-white/20 backdrop-blur-sm">
-                    <div className="rounded-full bg-white/30 p-4 mb-3">
-                      <Sparkles className="h-12 w-12 text-white" />
-                    </div>
-                    <p className="text-white font-semibold text-sm">Maske Uygulaması</p>
-                  </div>
-                )}
+                <img src="https://i.hizliresim.com/m8vz6un.png" alt="G glowmask" className="h-full w-full object-cover" />
               </div>
             </motion.div>
           </div>
@@ -356,7 +351,7 @@ export default function Home() {
               {[
                 {
                   key: "before",
-                  img: settings?.beforeImage,
+                  img: "https://i.hizliresim.com/g48m0cq.png",
                   alt: "Önce",
                   label: "ÖNCE",
                   fallbackBg: "from-rose-100 to-slate-200",
@@ -366,7 +361,7 @@ export default function Home() {
                 },
                 {
                   key: "after",
-                  img: settings?.afterImage,
+                  img: "https://i.hizliresim.com/m66idrv.png",
                   alt: "Sonra",
                   label: "SONRA",
                   fallbackBg: "from-emerald-100 to-slate-100",
