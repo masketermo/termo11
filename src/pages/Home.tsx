@@ -82,9 +82,13 @@ function StarRating({ rating }: { rating: number }) {
 // ─── Main Component ──────────────────────────────────────────────────────────
 
 export default function Home() {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>([
+    { id: '1', name: 'TERMO MASKE SET 1', price: 699, oldPrice: 799, image: 'https://i.hizliresim.com/m8vz6un.png' },
+    { id: '2', name: 'TERMO MASKE SET 2', price: 999, oldPrice: 1399, image: 'https://i.hizliresim.com/m8vz6un.png', popular: true },
+    { id: '3', name: 'TERMO MASKE SET 3', price: 1199, oldPrice: 2100, image: 'https://i.hizliresim.com/m8vz6un.png' }
+  ]);
   const [settings, setSettings] = useState<SiteSettings | null>(null);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>({ id: '2', name: 'TERMO MASKE SET 2', price: 999, oldPrice: 1399, image: 'https://i.hizliresim.com/m8vz6un.png', popular: true });
   const orderFormRef = useRef<HTMLDivElement>(null);
   const [showAllReviews, setShowAllReviews] = useState(false);
 
